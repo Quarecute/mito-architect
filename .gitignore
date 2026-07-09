@@ -1,0 +1,42 @@
+# Native build output
+build/
+build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+compile_commands.json
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Rust
+target/
+
+# JavaScript
+node_modules/
+web/dist/
+visualization-lib/dist/
+*.tsbuildinfo
+
+# Local dependency/cache directories
+.deps/
+.local/
+tmp/
+
+# Generated reports and local runtime files
+output.html
+report.html
+mito-*.html
+*.log
+.env
+.env.*
+
+# Editor/OS noise
+.DS_Store
+.idea/
+.vscode/

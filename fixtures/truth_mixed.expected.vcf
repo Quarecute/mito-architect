@@ -1,0 +1,11 @@
+##fileformat=VCFv4.3
+##source=MitoArchitect
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Alternate read support">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Passed read count used as denominator">
+##INFO=<ID=HF,Number=A,Type=Float,Description="Heteroplasmy fraction estimated from read support / passed reads">
+##INFO=<ID=GENE,Number=1,Type=String,Description="Annotated mitochondrial gene">
+##INFO=<ID=CLNSIG,Number=1,Type=String,Description="Clinical significance from local annotation cache">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype placeholder for haploid mtDNA export">
+##FORMAT=<ID=HF,Number=1,Type=Float,Description="Heteroplasmy fraction">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	truth_mixed
+NC_012920.1	3	.	T	G	.	PASS	AC=1;DP=2;HF=0.500000	GT:HF	0/1:0.500000

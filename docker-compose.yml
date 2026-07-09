@@ -1,0 +1,30 @@
+services:
+  server:
+    build: .
+    image: mito-architect:local
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./tmp:/app/tmp
+    environment:
+      MITO_CLINICAL_ANNOTATIONS: /app/core/data/clinical_annotations.tsv
+      MITO_SERVER_ADDR: 0.0.0.0:8080
+
+  web:
+    image: node:20-bookworm
+    working_dir: /src
+    command: sh -c "npm ci && npm --workspace web run dev -- --host 0.0.0.0"
+    ports:
+      - "127.0.0.1:5173:5173"
+    volumes:
+      - .:/src
+      - web_node_modules:/src/node_modules
+      - web_workspace_node_modules:/src/web/node_modules
+      - viz_workspace_node_modules:/src/visualization-lib/node_modules
+    depends_on:
+      - server
+
+volumes:
+  web_node_modules:
+  web_workspace_node_modules:
+  viz_workspace_node_modules:

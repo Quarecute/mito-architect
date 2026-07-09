@@ -1,0 +1,14 @@
+.git
+.github
+build
+build-*
+target
+node_modules
+web/dist
+visualization-lib/dist
+tmp
+.deps
+.local
+output.html
+report.html
+mito-*.html

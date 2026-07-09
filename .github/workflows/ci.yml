@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libhts-dev nodejs npm pkg-config
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.80.0
+
+      - name: Configure C++
+        run: cmake -S . -B build -DMITO_BUILD_TESTS=ON
+
+      - name: Build C++
+        run: cmake --build build -j2
+
+      - name: Test C++
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Check Rust
+        run: cargo check --workspace
+
+      - name: Test Rust
+        run: cargo test --workspace
+
+      - name: Lint Rust
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Type-check JS
+        run: npm run typecheck
+
+      - name: Build JS
+        run: npm run build
