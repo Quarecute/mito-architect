@@ -4,17 +4,35 @@ Mito-Architect is a long-read mitochondrial DNA analysis workbench. It combines 
 C++ analysis core, a Rust CLI/backend, a TypeScript visualization library, and a
 React web UI around one JSON result contract.
 
-The current build is an end-to-end prototype mtDNA analysis workbench: it
+The current 0.4.1 build is an end-to-end research-use mtDNA analysis workbench: it
 accepts FASTQ/SAM inputs directly, can use htslib for SAM/BAM/CRAM when htslib
 is available at build time, uses a bundled rCRS reference (`NC_012920.1`),
-detects tagged/CIGAR SVs including soft-clips, clusters reads by DBSCAN over
-SNP/SV feature tokens, annotates known variants from a local MITOMAP/
-ClinVar-style cache, and renders interactive reports.
+reconstructs CIGAR and split-alignment events, clusters molecules by DBSCAN over
+SNP/SV feature tokens, assigns ranked haplogroups from PhyloTree rCRS 17.3,
+annotates known variants from a versioned local MITOMAP/ClinVar-compatible
+cache, and renders interactive reports.
 
-This repository is not yet a validated clinical or production bioinformatics
-pipeline. SNP discovery, NUMT filtering, haplogroup assignment, and several
-analysis modules are intentionally lightweight extension points so the UI,
-backend, FFI, and result contract can be exercised end to end.
+This repository is not yet an analytically validated clinical or operated
+production bioinformatics service. The 0.3.x and 0.4 software milestones are
+implemented, but blinded performance evidence, durable service infrastructure,
+security controls, and laboratory sign-off remain mandatory for 1.0.
+
+The executable production programme and release gates are defined in
+[`docs/PRODUCTION_ACCEPTANCE.md`](docs/PRODUCTION_ACCEPTANCE.md). A release must
+not be labelled production-ready until its external analytical and operational
+evidence is complete. The ordered implementation milestones are in
+[`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+Version 1.0 execution is active at **0.5 / RC1**. The live evidence ledger is
+[`docs/RELEASE_STATUS.md`](docs/RELEASE_STATUS.md); the normative scientific
+draft is [`docs/SCIENTIFIC_SPECIFICATION.md`](docs/SCIENTIFIC_SPECIFICATION.md),
+and stable machine-readable failures are documented in
+[`docs/ERROR_CONTRACT.md`](docs/ERROR_CONTRACT.md). Status is gate-based rather
+than an unverifiable percentage.
+
+For a map of user guides, scientific contracts, roadmaps, evidence, and release
+history, start with [`docs/README.md`](docs/README.md). Repository-level changes
+are summarized in [`CHANGELOG.md`](CHANGELOG.md).
 
 FASTQ ingestion does not perform read alignment. Alignment-derived SNPs,
 CIGAR SVs, MAPQ, and coverage require SAM/BAM/CRAM input; raw FASTQ currently
@@ -29,14 +47,26 @@ contributes read-level quality/NUMT heuristics and explicit test tags only.
 - Optional htslib-backed SAM/BAM/CRAM reader with CIGAR, MAPQ, flags, and aux
   tag preservation.
 - NUMT filtering hook with explicit read accounting.
-- Large deletion/insertion calls with supporting reads.
+- Competitive-alignment NUMT evidence and explicit warnings when specificity
+  cannot be assessed.
+- Molecule-level deletion, insertion, duplication, inversion, and circular-
+  origin reconstruction from primary and supplementary alignments.
+- Canonical SV event schema 1.0 merges equivalent CIGAR, forward-split, and
+  reverse-split evidence with exact external JSON regression data.
+- Versioned PhyloTree rCRS 17.3 haplogroup ranking with alternatives, missing
+  sites, quality, contamination warnings, and checksums.
 - CIGAR-aware coverage excludes unmapped and NUMT-filtered reads and reports
   exact site-level mean, maximum, and >20x statistics alongside display bins.
 - Cluster drill-down: click a cluster to inspect its SNPs, SVs, support,
   frequencies, molecule IDs, and genome distribution.
 - Local clinical cache for MITOMAP/ClinVar-style annotations.
-- Lazy-loaded NGL WebGL viewer for MT-ATP6/MT-ND4 protein-residue inspection.
+- Lazy-loaded NGL WebGL viewer for curated MT-ATP6/MT-ND4 residue inspection,
+  with bundled local-first RCSB experimental coordinates, mapped-chain/full-
+  complex views, network fallbacks, B-factor semantics, 5 Å molecular
+  context, checksum verification, and provenance links.
 - Offline HTML report and React web UI consume the same JSON schema.
+- Stable native/C/Rust error categories and a versioned HTTP failure envelope;
+  callers never need to parse diagnostic prose.
 
 ## Repository
 
@@ -47,13 +77,28 @@ cli/                Rust CLI and standalone HTML report generator
 server/             Rust axum backend
 visualization-lib/  TypeScript circular mtDNA plot library
 web/                React/Vite frontend
-fixtures/           Small FASTQ smoke data
+fixtures/           Deterministic FASTQ/SAM truth and expected outputs
+docs/               User, scientific, roadmap, and release evidence
+scripts/            Bootstrap, fixture, resource, and verification tools
 ```
 
 ## Build And Test
 
 For a user-facing setup guide, including native dependencies and Docker-first
 installation, see [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
+
+Audit the complete native toolchain without changing the host, or install it on
+a supported Debian/Ubuntu/Arch host and run the release gate:
+
+```bash
+bash scripts/bootstrap.sh --check
+bash scripts/bootstrap.sh --install --verify
+```
+
+The installer deliberately uses the host package manager for native tools and
+the committed Cargo/npm lockfiles for project packages. It does not silently
+install Docker unless `--include-docker` is supplied, and it cannot install
+laboratory validation evidence, clinical-data licences, or deployment services.
 
 Run the full local verification gate:
 
@@ -107,6 +152,16 @@ LD_LIBRARY_PATH="$PWD/.local/htslib/lib" ctest --test-dir build-hft-deps --outpu
 
 ## CLI
 
+Check compiled native capabilities and external tools:
+
+```bash
+cargo run -p mito-cli -- doctor
+```
+
+The doctor output includes engine, result-schema, and error-schema versions.
+Analysis failures are emitted as `[MITO-E....] message`; automation must branch
+on the code described in [`docs/ERROR_CONTRACT.md`](docs/ERROR_CONTRACT.md).
+
 Emit JSON:
 
 ```bash
@@ -118,6 +173,17 @@ Use multiple C++ workers for per-read feature extraction:
 ```bash
 cargo run -p mito-cli -- analyze -i sample.bam --json --threads 8
 ```
+
+Tune the explicit evidence thresholds when a validated protocol requires it:
+
+```bash
+cargo run -p mito-cli -- analyze -i sample.bam --json --threads 8 \
+  --min-mapq 30 --min-base-quality 20 --numt-threshold 0.30
+```
+
+Synthetic FASTQ header controls are test-only and disabled by default. The
+`--allow-development-tags` flag exists solely for committed development
+fixtures and must not be used for biological analysis.
 
 Generate an offline report:
 
@@ -205,30 +271,40 @@ a measured memory envelope. The active queued/running job cap defaults to 16.
 Browser origins default to `http://127.0.0.1:5173` and
 `http://localhost:5173`. Set a comma-separated deployment allowlist with
 `MITO_CORS_ORIGINS`; the API no longer enables unrestricted CORS.
-The provided Compose ports bind to loopback; exposing the API beyond the local
-host requires an authenticated reverse proxy because the server itself does not
-implement user authentication.
+The provided Compose ports bind to loopback. The server refuses a non-loopback
+bind unless `MITO_API_KEY` is set; protected endpoints then require
+`Authorization: Bearer <key>`. A deployment still needs TLS, user-level
+authorization, audit logging, and policy enforcement at a trusted ingress.
 
 ## Result Contract
 
 Every layer consumes the same JSON document. The current result schema version
-is `0.2`.
+is `0.4`.
 
-- `metadata`: schema version, sample, engine version, rCRS/custom reference,
-  thread request.
-- `filter_stats`: input reads, passed reads, NUMT-filtered reads.
+- `metadata`: result and SV-event schema versions, sample, engine version,
+  rCRS/custom reference, thread request, and versioned resource
+  paths/checksums/sources/licenses.
+- `filter_stats`: alignment-record and molecule counts, passed and NUMT-filtered
+  molecules, evidence mode, and whether NUMT specificity is assessable.
 - `genes`: rCRS gene intervals.
 - `coverage` and `coverage_metrics`: rounded binned depth plus exact site-level
   mean, maximum, and >20x summary statistics for passed mapped reads.
 - `coverage_metrics.mapping_quality_histogram`: MAPQ distribution from parsed
   passed, mapped alignment metadata.
-- `svs`: structural variants, breakpoints, known-event flag, supporting reads.
-- `clusters`: cluster ID, label, haplogroup field, size, reads, SV signature.
+- `svs`: canonical structural-event IDs, breakpoints, sorted evidence-source
+  and strand-transition sets, segment count, known-event flag, and sorted
+  supporting molecules. Equivalent CIGAR/forward-split/reverse-split evidence
+  merges under SV event schema `1.0`.
+- `clusters`: cluster ID, ranked PhyloTree assignment, alternatives, missing and
+  extra sites, contamination warning, size, reads, and SV signature.
 - `reads`: per-read SNPs, SV IDs, NUMT status, quality, cluster assignment,
   DBSCAN outlier flag, MAPQ, flags, reference name, and preserved aux tags.
 - SNP `annotation`: local MITOMAP/ClinVar-style phenotype, pathogenicity,
   references, and source labels.
 - SNP `structure`: optional protein/residue/structure mapping for 3D display.
+- `variants`: authoritative locus-level SNP evidence with quality-filtered
+  reference/alternate/other depth, callable DP, HF, Wilson 95% interval, and
+  supporting molecule IDs.
 
 ## Analysis Modules
 
@@ -237,15 +313,15 @@ The React result page contains module tabs for:
 - Haplogroups: cluster-level assignment field and signatures.
 - Clinical: variant pathogenicity, phenotype, references, and sources.
 - Coverage: mean depth, high-depth fraction, max depth, histogram preview.
-- Multi-sample: sample x variant matrix surface for merged jobs.
-- Single-cell: barcode-aware summary surface for `CB/CR` tagged reads.
 - 3D Protein: NGL molecular viewer with representation modes, residue focus,
-  spin, reset, and PNG export.
-- Timeline: dated-sample surface for future tree and molecular-clock output.
+  experimental B-factor coloring, mapped-chain or full-complex scope, 5 Å
+  residue context, spin, reset, provenance, PNG export, and adjacent read-
+  cluster/molecule support. The viewer accepts curated PDB mappings only and
+  never fabricates fallback coordinates.
 
-Production-scale versions of these modules need the full local resource bundle:
-PhyloTree build 17, full MITOMAP/ClinVar exports, optional MAFFT/FastTree/
-IQ-TREE/TreeTime binaries, and curated protein structure mappings.
+Multi-sample, single-cell, and longitudinal tabs are intentionally not exposed
+until their multi-input schemas, statistics, tests, and failure states are
+implemented. The production UI does not present placeholder analyses.
 
 ## Production Readiness
 
@@ -290,6 +366,13 @@ fixtures, the Release benchmark target, and, when requested, the Docker image:
 bash scripts/verify.sh
 ```
 
+Run the native sanitizer gate separately or include it in the canonical gate:
+
+```bash
+bash scripts/verify_sanitizers.sh
+MITO_VERIFY_SANITIZERS=1 bash scripts/verify.sh
+```
+
 Include Docker in that local gate with:
 
 ```bash
@@ -297,7 +380,10 @@ MITO_VERIFY_DOCKER=1 bash scripts/verify.sh
 ```
 
 Release notes for the current version are in
-[`docs/RELEASE_NOTES_0.2.0.md`](docs/RELEASE_NOTES_0.2.0.md).
+[`docs/RELEASE_NOTES_0.4.1.md`](docs/RELEASE_NOTES_0.4.1.md). The staged path to
+1.0 is in [`docs/PLAN_1.0.md`](docs/PLAN_1.0.md), and the latest local evidence
+is recorded in
+[`docs/VERIFICATION_0.5_RC1_DEV.md`](docs/VERIFICATION_0.5_RC1_DEV.md).
 
 ## Threading Model
 
@@ -315,21 +401,36 @@ jobs with `MITO_MAX_CONCURRENT_JOBS`.
 - `core/data/rcrs.fasta`: bundled RefSeq rCRS (`NC_012920.1`).
 - `core/data/clinical_annotations.tsv`: small local annotation cache used by
   tests, fixtures, CLI, backend, and demo UI.
+- `core/data/phylotree-rcrs-17.3.xml` and `-weights.txt`: versioned haplogroup
+  resource and weights with the upstream MIT license.
+- `core/data/resource_manifest.tsv`: source, license, retrieval date, and
+  SHA-256 identity for bundled scientific resources.
+- `web/public/structures/`: curated checksum-verified RCSB BinaryCIF models used
+  by the current variant-to-protein mappings.
+- `fixtures/`: deterministic SAM/FASTQ truth inputs and expected VCF output;
+  see [`fixtures/README.md`](fixtures/README.md) for BAM generation and a
+  bounded public Oxford Nanopore validation dataset.
 
 ## Current Boundaries
 
-The code intentionally does not fake unavailable production dependencies.
-hg38 NUMT remapping, a native HDBSCAN library adapter, full PhyloTree
-classification, and complete licensed clinical databases are extension points
-behind the current APIs and JSON schema. DBSCAN is implemented in-core as the
-current density-clustering baseline.
+The code intentionally does not fake unavailable production evidence or
+resources. The HDBSCAN-C++ adapter is build-tested when explicitly configured;
+complete clinical databases, durable
+storage, service security, and blinded analytical validation remain outside
+0.4. DBSCAN is implemented in-core as the current density-clustering baseline.
 
 Algorithmic caveats in the current prototype:
 
 - Plain FASTQ has no alignment coordinates, so production SNP evidence should
   come from aligned SAM/BAM/CRAM or an explicit variant-calling stage.
-- NUMT filtering is a heuristic based on read name, read length, and GC
-  fraction until nuclear remapping is implemented.
+- NUMT specificity is assessable only when the input was competitively aligned
+  to a nuclear-plus-mitochondrial reference. FASTQ and mtDNA-only inputs are
+  explicitly marked non-assessable; their heuristic evidence is not sufficient
+  for low-frequency interpretation.
+- The current PhyloTree scorer covers simple SNVs and backmutations; complex
+  indel nomenclature and externally calibrated quality scores remain 1.0 work.
+- The bundled clinical annotation table is a development subset, not a complete
+  clinical knowledgebase.
 - Cancellation is cooperative and is checked between major native analysis
   steps; blocking third-party file reads may only observe cancellation after the
   read call returns.

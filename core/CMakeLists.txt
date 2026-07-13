@@ -21,10 +21,13 @@ target_compile_definitions(mito_core
   PRIVATE
     MITO_DEFAULT_RCRS_FASTA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/rcrs.fasta"
     MITO_CLINICAL_ANNOTATIONS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/clinical_annotations.tsv"
+    MITO_PHYLOTREE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/phylotree-rcrs-17.3.xml"
+    MITO_PHYLOTREE_WEIGHTS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/phylotree-rcrs-17.3-weights.txt"
+    MITO_RESOURCE_MANIFEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/resource_manifest.tsv"
 )
 target_link_libraries(mito_core PUBLIC Threads::Threads)
 if(HTSLIB_FOUND)
-  target_compile_definitions(mito_core PRIVATE MITO_HAS_HTSLIB=1)
+  target_compile_definitions(mito_core PUBLIC MITO_HAS_HTSLIB=1)
   target_include_directories(mito_core SYSTEM PRIVATE ${HTSLIB_INCLUDE_DIRS})
   target_link_libraries(mito_core PUBLIC ${HTSLIB_LIBRARIES})
   target_link_directories(mito_core PUBLIC ${HTSLIB_LIBRARY_DIRS})
@@ -58,7 +61,15 @@ mito_enable_warnings(mito_core)
 
 install(TARGETS mito_core ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
-install(FILES data/rcrs.fasta data/clinical_annotations.tsv DESTINATION share/mito-architect/reference)
+install(FILES
+  data/rcrs.fasta
+  data/clinical_annotations.tsv
+  data/phylotree-rcrs-17.3.xml
+  data/phylotree-rcrs-17.3-weights.txt
+  data/phylotree-rcrs-17.3.LICENSE
+  data/resource_manifest.tsv
+  DESTINATION share/mito-architect/reference
+)
 
 if(MITO_BUILD_TESTS AND BUILD_TESTING)
   add_executable(mito_core_smoke_test tests/core_smoke_test.cpp)

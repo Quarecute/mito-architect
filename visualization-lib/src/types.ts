@@ -3,6 +3,7 @@ export type LayerName = 'genes' | 'coverage' | 'clusters' | 'svs' | 'snps';
 /** Run-level metadata emitted by the native analysis core. */
 export interface MitoMetadata {
   schema_version?: string;
+  sv_event_schema_version?: string;
   engine_version: string;
   sample: string;
   input_path?: string;
@@ -11,6 +12,24 @@ export interface MitoMetadata {
   reference_length: number;
   threads?: number;
   algorithm_notes?: string[];
+  calling_parameters?: {
+    min_mapping_quality: number;
+    min_base_quality: number;
+    excluded_snp_flags: number;
+    numt_threshold?: number;
+    development_tags_enabled?: boolean;
+  };
+  resources?: AnalysisResource[];
+}
+
+export interface AnalysisResource {
+  name: string;
+  version: string;
+  path: string;
+  sha256: string;
+  source: string;
+  license: string;
+  retrieved: string;
 }
 
 /** NUMT and input-read accounting. */
@@ -19,6 +38,13 @@ export interface FilterStats {
   passed_reads: number;
   numt_filtered_reads: number;
   numt_threshold: number;
+  input_alignment_records?: number;
+  input_molecules?: number;
+  numt_assessment?: {
+    mode: 'competitive_alignment' | 'mt_only_or_unknown' | 'unaligned_fastq' | string;
+    nuclear_contigs_present: boolean;
+    specificity_assessable: boolean;
+  };
 }
 
 /** rCRS gene interval used by circular tracks and gene search. */
@@ -46,6 +72,15 @@ export interface StructuralVariant {
   length: number;
   known_event: boolean;
   supporting_reads: string[];
+  /** @deprecated Use evidence_sources; retained for result-schema 0.4 readers. */
+  evidence_source?: 'cigar' | 'split_alignment' | 'development_tag' | 'combined' | string;
+  /** Sorted unique provenance categories merged under the canonical event ID. */
+  evidence_sources?: Array<'cigar' | 'split_alignment' | 'development_tag' | string>;
+  /** @deprecated Use orientations; retained for result-schema 0.4 readers. */
+  orientation?: string;
+  /** Sorted unique strand transitions observed for split-alignment evidence. */
+  orientations?: string[];
+  segment_count?: number;
   annotation?: ClinicalAnnotation;
 }
 
@@ -71,6 +106,18 @@ export interface SnpCall {
   structure?: ProteinStructureMapping;
 }
 
+/** Locus-level SNP evidence after MAPQ, base-quality, flag, and NUMT filters. */
+export interface AggregateVariant extends SnpCall {
+  alt_depth: number;
+  ref_depth: number;
+  other_depth: number;
+  callable_depth: number;
+  heteroplasmy: number;
+  ci95_low: number;
+  ci95_high: number;
+  supporting_reads: string[];
+}
+
 /** Clinical annotation resolved from the local MITOMAP/ClinVar cache. */
 export interface ClinicalAnnotation {
   phenotype?: string;
@@ -78,6 +125,8 @@ export interface ClinicalAnnotation {
   references?: string[];
   source?: 'MITOMAP' | 'ClinVar' | 'local-cache' | string;
   sources?: string[];
+  clinvar_allele_id?: string;
+  mitomap_url?: string;
 }
 
 /** Summary statistics for the coverage layer. */
@@ -86,7 +135,7 @@ export interface CoverageMetrics {
   pct_sites_gt20x?: number;
   pct_bins_gt20x?: number;
   max_depth: number;
-  mapping_quality_histogram: Array<{ range: string; count: number }>;
+  mapping_quality_histogram: Array<{ mapq: number; count: number }>;
 }
 
 export interface ReadFeature {
@@ -95,7 +144,13 @@ export interface ReadFeature {
   mean_quality: number;
   numt_score: number;
   filtered_numt: boolean;
+  numt_evidence?: string[];
   cluster_id: number;
+  mapping_quality?: number;
+  flags?: number;
+  reference_name?: string;
+  aux_tags?: Record<string, string>;
+  outlier?: boolean;
   snps: SnpCall[];
   sv_ids: string[];
 }
@@ -108,6 +163,18 @@ export interface ClusterSummary {
   consensus_haplotype: string;
   reads: string[];
   sv_signature: Array<{ sv_id: string; support: number }>;
+  haplogroup_assignment?: {
+    resource: string;
+    quality: number;
+    contamination_warning: boolean;
+    candidates: Array<{
+      name: string;
+      score: number;
+      matched: string[];
+      missing: string[];
+      extra: string[];
+    }>;
+  };
 }
 
 /** Full analysis payload shared by core, CLI, server, report, and UI. */
@@ -118,6 +185,7 @@ export interface MitoAnalysisData {
   genes: GeneAnnotation[];
   coverage: CoverageBin[];
   svs: StructuralVariant[];
+  variants?: AggregateVariant[];
   clusters: ClusterSummary[];
   reads: ReadFeature[];
 }

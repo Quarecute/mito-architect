@@ -18,6 +18,17 @@ fn main() {
     });
     println!("cargo:rerun-if-env-changed=MITO_HDBSCAN_CPP_ROOT");
     println!("cargo:rerun-if-env-changed=PKG_CONFIG_PATH");
+    if let Ok(output) = Command::new("pkg-config")
+        .args(["--variable=pcfiledir", "htslib"])
+        .output()
+    {
+        if output.status.success() {
+            let directory = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+            if !directory.is_empty() {
+                println!("cargo:rerun-if-changed={directory}/htslib.pc");
+            }
+        }
+    }
     let hdbscan_root = env::var("MITO_HDBSCAN_CPP_ROOT").unwrap_or_default();
     config.define("MITO_HDBSCAN_CPP_ROOT", hdbscan_root);
 

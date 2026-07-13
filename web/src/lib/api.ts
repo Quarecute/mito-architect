@@ -9,11 +9,32 @@ export interface UploadResponse {
 
 export type JobStatusValue = 'queued' | 'processing' | 'done' | 'error' | 'cancelled';
 
+export interface FailureBody {
+  schema_version: string;
+  code: string;
+  message: string;
+  retryable: boolean;
+}
+
 export interface StatusResponse {
   job_id: string;
   status: JobStatusValue;
   progress: number;
-  error?: string | null;
+  error?: FailureBody | null;
+}
+
+export class ApiClientError extends Error {
+  readonly code: string;
+  readonly retryable: boolean;
+  readonly status: number;
+
+  constructor(failure: FailureBody, status: number) {
+    super(`[${failure.code}] ${failure.message}`);
+    this.name = 'ApiClientError';
+    this.code = failure.code;
+    this.retryable = failure.retryable;
+    this.status = status;
+  }
 }
 
 export async function uploadFile(file: File): Promise<UploadResponse> {
@@ -49,11 +70,31 @@ async function parseResponse<T>(response: Response): Promise<T> {
     payload = { error: text || response.statusText };
   }
   if (!response.ok) {
-    const message =
-      typeof payload === 'object' && payload !== null && 'error' in payload
-        ? String((payload as { error?: unknown }).error)
-        : response.statusText;
-    throw new Error(message);
+    const error = extractFailure(payload);
+    if (error) {
+      throw new ApiClientError(error, response.status);
+    }
+    throw new Error(response.statusText || `HTTP ${response.status}`);
   }
   return payload as T;
+}
+
+function extractFailure(payload: unknown): FailureBody | null {
+  if (typeof payload !== 'object' || payload === null || !('error' in payload)) {
+    return null;
+  }
+  const error = (payload as { error?: unknown }).error;
+  if (typeof error !== 'object' || error === null) {
+    return null;
+  }
+  const candidate = error as Partial<FailureBody>;
+  if (
+    typeof candidate.schema_version !== 'string' ||
+    typeof candidate.code !== 'string' ||
+    typeof candidate.message !== 'string' ||
+    typeof candidate.retryable !== 'boolean'
+  ) {
+    return null;
+  }
+  return candidate as FailureBody;
 }

@@ -8,12 +8,8 @@ import {
   Activity,
   Atom,
   ChartNoAxesCombined,
-  Clock3,
   Database,
   Dna,
-  GitBranch,
-  ScanSearch,
-  Table2
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import NglProteinViewer, { type ProteinViewerVariant } from './NglProteinViewer';
@@ -26,10 +22,7 @@ type ModuleTab =
   | 'haplogroups'
   | 'clinical'
   | 'coverage'
-  | 'comparison'
-  | 'singleCell'
-  | 'protein'
-  | 'timeline';
+  | 'protein';
 
 interface VariantSummary {
   key: string;
@@ -44,16 +37,17 @@ interface VariantSummary {
   residue?: string;
   annotation?: ClinicalAnnotation;
   structure?: ProteinStructureMapping;
+  molecules: Array<{ id: string; clusterId: number }>;
+  callableDepth?: number;
+  ci95Low?: number;
+  ci95High?: number;
 }
 
 const MODULES: Array<{ id: ModuleTab; label: string; Icon: typeof Dna }> = [
   { id: 'haplogroups', label: 'Haplogroups', Icon: Dna },
   { id: 'clinical', label: 'Clinical', Icon: Database },
   { id: 'coverage', label: 'Coverage', Icon: Activity },
-  { id: 'comparison', label: 'Multi-sample', Icon: Table2 },
-  { id: 'singleCell', label: 'Single-cell', Icon: ScanSearch },
-  { id: 'protein', label: '3D Protein', Icon: Atom },
-  { id: 'timeline', label: 'Timeline', Icon: Clock3 }
+  { id: 'protein', label: '3D Protein', Icon: Atom }
 ];
 
 export default function AnalysisModulesPanel({ data }: AnalysisModulesPanelProps) {
@@ -96,10 +90,7 @@ export default function AnalysisModulesPanel({ data }: AnalysisModulesPanelProps
         {activeTab === 'haplogroups' && <HaplogroupPanel data={data} />}
         {activeTab === 'clinical' && <ClinicalPanel variants={variants} />}
         {activeTab === 'coverage' && <CoveragePanel data={data} metrics={coverageMetrics} />}
-        {activeTab === 'comparison' && <ComparisonPanel data={data} variants={variants} />}
-        {activeTab === 'singleCell' && <SingleCellPanel reads={passedReads} />}
         {activeTab === 'protein' && <ProteinPanel variants={variants} />}
-        {activeTab === 'timeline' && <TimelinePanel data={data} variants={variants} />}
       </div>
     </section>
   );
@@ -108,11 +99,12 @@ export default function AnalysisModulesPanel({ data }: AnalysisModulesPanelProps
 function HaplogroupPanel({ data }: { data: MitoAnalysisData }) {
   return (
     <div className="overflow-hidden rounded-md border border-line">
-      <div className="grid grid-cols-[0.7fr_0.9fr_0.6fr_1.4fr] gap-2 border-b border-line bg-panel2 px-3 py-2 text-xs font-semibold uppercase tracking-normal text-muted">
+      <div className="grid grid-cols-[0.7fr_0.8fr_0.55fr_0.8fr_1.4fr] gap-2 border-b border-line bg-panel2 px-3 py-2 text-xs font-semibold uppercase tracking-normal text-muted">
         <div>Cluster</div>
         <div>Haplogroup</div>
+        <div>Quality</div>
         <div>Molecules</div>
-        <div>SV signature</div>
+        <div>Alternatives / SV signature</div>
       </div>
       {data.clusters.length === 0 ? (
         <EmptyRow text="No clusters" />
@@ -120,17 +112,25 @@ function HaplogroupPanel({ data }: { data: MitoAnalysisData }) {
         data.clusters.map((cluster) => (
           <div
             key={cluster.id}
-            className="grid grid-cols-[0.7fr_0.9fr_0.6fr_1.4fr] gap-2 border-b border-line px-3 py-2 text-sm last:border-0"
+            className="grid grid-cols-[0.7fr_0.8fr_0.55fr_0.8fr_1.4fr] gap-2 border-b border-line px-3 py-2 text-sm last:border-0"
           >
             <div className="font-semibold">{cluster.label}</div>
             <div className={cluster.haplogroup === 'unassigned' ? 'text-muted' : 'text-aqua'}>
               {cluster.haplogroup ?? 'unassigned'}
+              {cluster.haplogroup_assignment?.contamination_warning && (
+                <span className="ml-2 text-amber" title="Competing macrohaplogroup assignments">
+                  mixed?
+                </span>
+              )}
             </div>
+            <div>{cluster.haplogroup_assignment ? `${cluster.haplogroup_assignment.quality.toFixed(1)}%` : '—'}</div>
             <div>{cluster.size}</div>
             <div className="truncate text-muted">
-              {cluster.sv_signature.length === 0
-                ? 'none'
-                : cluster.sv_signature.map((sv) => `${sv.sv_id} n=${sv.support}`).join(', ')}
+              {cluster.haplogroup_assignment?.candidates.slice(1).map((candidate) =>
+                `${candidate.name} ${candidate.score.toFixed(1)}%`
+              ).join(', ') || 'no ranked alternatives'}
+              {' | '}
+              {cluster.sv_signature.length === 0 ? 'no SVs' : cluster.sv_signature.map((sv) => `${sv.sv_id} n=${sv.support}`).join(', ')}
             </div>
           </div>
         ))
@@ -207,52 +207,6 @@ function CoveragePanel({
   );
 }
 
-function ComparisonPanel({ data, variants }: { data: MitoAnalysisData; variants: VariantSummary[] }) {
-  const sample = data.metadata.sample || 'sample';
-  return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="overflow-hidden rounded-md border border-line">
-        <div className="grid grid-cols-[1.3fr_0.7fr] gap-2 border-b border-line bg-panel2 px-3 py-2 text-xs font-semibold uppercase tracking-normal text-muted">
-          <div>Variant</div>
-          <div>{sample}</div>
-        </div>
-        {variants.slice(0, 14).map((variant) => (
-          <div
-            key={variant.key}
-            className="grid grid-cols-[1.3fr_0.7fr] gap-2 border-b border-line px-3 py-2 text-sm last:border-0"
-          >
-            <div className="truncate font-semibold">{variant.label}</div>
-            <div className={variant.support > 0 ? 'text-aqua' : 'text-muted'}>{variant.support > 0 ? 'present' : 'absent'}</div>
-          </div>
-        ))}
-        {variants.length === 0 && <EmptyRow text="No variant matrix rows" />}
-      </div>
-      <div className="rounded-md border border-line bg-panel2 p-4 text-sm">
-        <Metric label="Samples" value="1" />
-        <Metric label="Jaccard self" value="1.000" />
-        <Metric label="UPGMA status" value="waiting for multiple samples" />
-      </div>
-    </div>
-  );
-}
-
-function SingleCellPanel({ reads }: { reads: ReadFeature[] }) {
-  const cells = new Map<string, number>();
-  for (const read of reads) {
-    const match = read.id.match(/\b(?:CB|CR):Z:([^\s]+)/);
-    if (match) {
-      cells.set(match[1], (cells.get(match[1]) ?? 0) + 1);
-    }
-  }
-  return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      <Metric label="Cell barcodes" value={cells.size.toString()} />
-      <Metric label="Barcode reads" value={[...cells.values()].reduce((sum, count) => sum + count, 0).toString()} />
-      <Metric label="Cluster status" value={cells.size > 0 ? 'ready' : 'no CB/CR tags'} />
-    </div>
-  );
-}
-
 function ProteinPanel({ variants }: { variants: VariantSummary[] }) {
   const proteinVariants = variants.filter((variant) => variant.protein || variant.structure?.structure_id);
   const [selectedKey, setSelectedKey] = useState<string>();
@@ -308,6 +262,7 @@ function ProteinPanel({ variants }: { variants: VariantSummary[] }) {
               <Metric label="Structure" value={selected.structure?.structure_id ?? 'local model'} />
               <Metric label="Frequency" value={formatPercent(selected.frequency)} />
             </dl>
+            <MoleculeDistribution variant={selected} />
           </div>
         ) : (
           <div className="text-sm text-muted">
@@ -315,6 +270,60 @@ function ProteinPanel({ variants }: { variants: VariantSummary[] }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function MoleculeDistribution({ variant }: { variant: VariantSummary }) {
+  const clusters = new Map<number, number>();
+  for (const molecule of variant.molecules) {
+    clusters.set(molecule.clusterId, (clusters.get(molecule.clusterId) ?? 0) + 1);
+  }
+  const groups = [...clusters.entries()].sort(([left], [right]) => left - right);
+  const maximum = Math.max(1, ...groups.map(([, count]) => count));
+
+  return (
+    <div className="rounded-md border border-line bg-panel p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-normal text-muted">Molecule-level support</div>
+          <div className="mt-1 text-sm text-text">
+            {variant.molecules.length} observed molecules across {groups.length} read cluster{groups.length === 1 ? '' : 's'}
+          </div>
+        </div>
+        <div className="text-xs text-muted">
+          {variant.callableDepth == null
+            ? 'Observed fraction; locus-callable depth unavailable'
+            : `HF ${formatPercent(variant.frequency)} | DP ${variant.callableDepth} | 95% CI ${formatPercent(
+                variant.ci95Low ?? 0
+              )}-${formatPercent(variant.ci95High ?? 0)}`}
+        </div>
+      </div>
+      {groups.length > 0 && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {groups.map(([clusterId, count]) => (
+            <div key={clusterId} className="rounded border border-line bg-panel2 px-2.5 py-2 text-xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-text">{clusterId < 0 ? 'Outliers' : `Cluster ${clusterId + 1}`}</span>
+                <span className="text-aqua">n={count}</span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-shell">
+                <div className="h-full rounded-full bg-aqua" style={{ width: `${(count / maximum) * 100}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <details className="mt-3 text-xs text-muted">
+        <summary className="cursor-pointer select-none font-semibold text-text">Supporting molecule IDs</summary>
+        <div className="mt-2 max-h-28 overflow-auto rounded border border-line bg-shell p-2 font-mono">
+          {variant.molecules.map((molecule) => (
+            <div key={`${molecule.clusterId}:${molecule.id}`} className="truncate" title={molecule.id}>
+              {molecule.id}
+            </div>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }
@@ -329,29 +338,6 @@ function toProteinViewerVariant(variant: VariantSummary): ProteinViewerVariant {
     frequency: variant.frequency,
     structure: variant.structure
   };
-}
-
-function TimelinePanel({ data, variants }: { data: MitoAnalysisData; variants: VariantSummary[] }) {
-  const metadata = data.metadata as typeof data.metadata & { collection_date?: string };
-  return (
-    <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-      <div className="grid gap-3">
-        <Metric label="Samples with dates" value={metadata.collection_date ? '1' : '0'} />
-        <Metric label="Tree tips" value="1" />
-        <Metric label="Variant events" value={variants.length.toString()} />
-      </div>
-      <div className="rounded-md border border-line bg-panel2 p-4">
-        <div className="flex items-center gap-3 text-sm">
-          <GitBranch className="h-4 w-4 text-aqua" aria-hidden />
-          <span className="font-semibold">{data.metadata.sample}</span>
-          <span className="text-muted">{metadata.collection_date ?? 'date not provided'}</span>
-        </div>
-        <div className="mt-4 h-1 rounded-full bg-line">
-          <div className="h-1 w-full rounded-full bg-aqua" />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
@@ -372,14 +358,42 @@ function EmptyRow({ text }: { text: string }) {
 function summarizeVariants(reads: ReadFeature[], data: MitoAnalysisData): VariantSummary[] {
   const denominator = Math.max(1, reads.length);
   const snps = new Map<string, VariantSummary>();
+  const readClusterById = new Map(reads.map((read) => [read.id, read.cluster_id]));
 
-  for (const read of reads) {
-    for (const snp of read.snps) {
+  if (data.variants) {
+    for (const snp of data.variants) {
+      const key = `snp:${snp.position}:${snp.ref}:${snp.alt}`;
+      snps.set(key, {
+        key,
+        label: `${snp.position} ${snp.ref}>${snp.alt}`,
+        type: 'SNP',
+        position: snp.position,
+        support: snp.alt_depth,
+        frequency: snp.heteroplasmy,
+        gene: snp.gene,
+        consequence: snp.consequence,
+        protein: snp.protein,
+        residue: snp.residue,
+        annotation: snp.annotation,
+        structure: snp.structure,
+        molecules: snp.supporting_reads.map((id) => ({
+          id,
+          clusterId: readClusterById.get(id) ?? -1
+        })),
+        callableDepth: snp.callable_depth,
+        ci95Low: snp.ci95_low,
+        ci95High: snp.ci95_high
+      });
+    }
+  } else {
+    for (const read of reads) {
+      for (const snp of read.snps) {
       const key = `snp:${snp.position}:${snp.ref}:${snp.alt}`;
       const existing = snps.get(key);
       if (existing) {
         existing.support += 1;
         existing.frequency = existing.support / denominator;
+        existing.molecules.push({ id: read.id, clusterId: read.cluster_id });
       } else {
         snps.set(key, {
           key,
@@ -393,9 +407,11 @@ function summarizeVariants(reads: ReadFeature[], data: MitoAnalysisData): Varian
           protein: snp.protein,
           residue: snp.residue,
           annotation: snp.annotation,
-          structure: snp.structure
+          structure: snp.structure,
+          molecules: [{ id: read.id, clusterId: read.cluster_id }]
         });
       }
+    }
     }
   }
 
@@ -406,7 +422,11 @@ function summarizeVariants(reads: ReadFeature[], data: MitoAnalysisData): Varian
     position: sv.start,
     support: sv.supporting_reads.length,
     frequency: sv.supporting_reads.length / denominator,
-    annotation: sv.annotation
+    annotation: sv.annotation,
+    molecules: sv.supporting_reads.map((id) => ({
+      id,
+      clusterId: readClusterById.get(id) ?? -1
+    }))
   }));
 
   return [...snps.values(), ...svs].sort((a, b) => a.position - b.position || a.label.localeCompare(b.label));

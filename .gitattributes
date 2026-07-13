@@ -1,0 +1,3 @@
+# Preserve exact upstream/checksummed scientific and structural resource bytes.
+core/data/phylotree-rcrs-17.3.xml -text -diff
+web/public/structures/*.bcif -text -diff

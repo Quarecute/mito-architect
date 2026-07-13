@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "input_alignment_records": 10,
+  "input_molecules": 10,
+  "passed_reads": 9,
+  "numt_filtered_reads": 1,
+  "svs": [
+    {
+      "id": "circular_origin:16559-20",
+      "type": "circular_origin",
+      "start": 16559,
+      "end": 20,
+      "length": 29,
+      "known_event": false,
+      "evidence_source": "split_alignment",
+      "evidence_sources": ["split_alignment"],
+      "segment_count": 2,
+      "orientation": "mixed",
+      "orientations": ["+/+", "-/-"],
+      "supporting_reads": ["reverse-equivalent-origin", "split-origin"]
+    },
+    {
+      "id": "deletion:110-299",
+      "type": "deletion",
+      "start": 110,
+      "end": 299,
+      "length": 190,
+      "known_event": false,
+      "evidence_source": "combined",
+      "evidence_sources": ["cigar", "split_alignment"],
+      "segment_count": 2,
+      "orientation": "mixed",
+      "orientations": ["+/+", "-/-"],
+      "supporting_reads": [
+        "cigar-equivalent-deletion",
+        "reverse-equivalent-deletion",
+        "split-deletion"
+      ]
+    },
+    {
+      "id": "duplication:1000-1009",
+      "type": "duplication",
+      "start": 1000,
+      "end": 1009,
+      "length": 10,
+      "known_event": false,
+      "evidence_source": "split_alignment",
+      "evidence_sources": ["split_alignment"],
+      "segment_count": 2,
+      "orientation": "+/+",
+      "orientations": ["+/+"],
+      "supporting_reads": ["split-duplication"]
+    },
+    {
+      "id": "insertion:1209+20",
+      "type": "insertion",
+      "start": 1209,
+      "end": 1209,
+      "length": 20,
+      "known_event": false,
+      "evidence_source": "combined",
+      "evidence_sources": ["cigar", "split_alignment"],
+      "segment_count": 2,
+      "orientation": "+/+",
+      "orientations": ["+/+"],
+      "supporting_reads": ["cigar-equivalent-insertion", "split-insertion"]
+    },
+    {
+      "id": "inversion:509-809",
+      "type": "inversion",
+      "start": 509,
+      "end": 809,
+      "length": 301,
+      "known_event": false,
+      "evidence_source": "split_alignment",
+      "evidence_sources": ["split_alignment"],
+      "segment_count": 2,
+      "orientation": "+/-",
+      "orientations": ["+/-"],
+      "supporting_reads": ["split-inversion"]
+    }
+  ]
+}

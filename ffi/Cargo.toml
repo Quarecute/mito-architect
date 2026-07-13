@@ -1,6 +1,6 @@
 [package]
 name = "mito-ffi"
-version = "0.2.0"
+version = "0.4.1"
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
@@ -9,9 +9,6 @@ build = "build.rs"
 
 [lib]
 name = "mito_ffi"
-
-[dependencies]
-anyhow.workspace = true
 
 [build-dependencies]
 cmake.workspace = true

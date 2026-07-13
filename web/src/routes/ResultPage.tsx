@@ -85,6 +85,34 @@ export default function ResultPage() {
         <Metric icon={<Gauge className="h-4 w-4" />} label="Clusters" value={data.clusters.length} />
       </section>
 
+      {data.filter_stats.numt_assessment && !data.filter_stats.numt_assessment.specificity_assessable && (
+        <section className="rounded-lg border border-amber/50 bg-amber/10 px-4 py-3 text-sm text-amber">
+          NUMT specificity is not assessable for this input ({data.filter_stats.numt_assessment.mode}).
+          Re-align molecules competitively to a versioned nuclear-plus-mitochondrial reference before interpreting
+          low-frequency variants.
+        </section>
+      )}
+
+      {data.metadata.resources && data.metadata.resources.length > 0 && (
+        <section className="glass-panel rounded-lg border border-line px-4 py-3 shadow-tool">
+          <div className="text-xs font-semibold uppercase tracking-normal text-muted">Versioned analysis resources</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {data.metadata.resources.map((resource) => (
+              <a
+                key={`${resource.name}:${resource.version}`}
+                href={resource.source}
+                target="_blank"
+                rel="noreferrer"
+                title={`${resource.path} | SHA-256 ${resource.sha256}`}
+                className="rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs text-aqua hover:border-aqua"
+              >
+                {resource.name} {resource.version}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="glass-panel rounded-lg border border-line p-3 shadow-tool">
           <CircosWrapper

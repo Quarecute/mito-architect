@@ -3,6 +3,7 @@
 #include "mito/version.hpp"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cctype>
 #include <charconv>
@@ -23,7 +24,9 @@
 #include <stdexcept>
 #include <string_view>
 #include <thread>
+#include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -36,6 +39,39 @@
 #endif
 
 namespace mito {
+
+std::string_view analysis_error_code_name(const AnalysisErrorCode code) noexcept {
+  switch (code) {
+  case AnalysisErrorCode::invalid_configuration:
+    return "MITO-E1001";
+  case AnalysisErrorCode::input_open_failed:
+    return "MITO-E1101";
+  case AnalysisErrorCode::input_format_unsupported:
+    return "MITO-E1102";
+  case AnalysisErrorCode::input_parse_failed:
+    return "MITO-E1103";
+  case AnalysisErrorCode::input_empty:
+    return "MITO-E1104";
+  case AnalysisErrorCode::reference_open_failed:
+    return "MITO-E1201";
+  case AnalysisErrorCode::reference_invalid:
+    return "MITO-E1202";
+  case AnalysisErrorCode::resource_open_failed:
+    return "MITO-E1301";
+  case AnalysisErrorCode::resource_invalid:
+    return "MITO-E1302";
+  case AnalysisErrorCode::dependency_unavailable:
+    return "MITO-E1401";
+  case AnalysisErrorCode::analysis_cancelled:
+    return "MITO-E1501";
+  case AnalysisErrorCode::resource_exhausted:
+    return "MITO-E1601";
+  case AnalysisErrorCode::internal_error:
+    return "MITO-E9001";
+  }
+  return "MITO-E9001";
+}
+
 namespace {
 
 struct GeneAnnotation {
@@ -62,6 +98,12 @@ struct ReadRecord {
   std::uint16_t flags = 0;
   std::uint8_t mapping_quality = 0;
   std::map<std::string, std::string> aux_tags;
+};
+
+struct InputRecords {
+  std::vector<ReadRecord> reads;
+  bool alignment_input = false;
+  bool has_nuclear_contigs = false;
 };
 
 struct SnpCall {
@@ -92,6 +134,9 @@ struct SvCall {
   std::size_t length = 0;
   std::vector<std::string> supporting_reads;
   bool known_event = false;
+  std::vector<std::string> evidence_sources;
+  std::vector<std::string> orientations;
+  std::size_t segment_count = 1;
 };
 
 struct ReadFeature {
@@ -100,6 +145,7 @@ struct ReadFeature {
   double mean_quality = 0.0;
   double numt_score = 0.0;
   bool filtered_numt = false;
+  std::vector<std::string> numt_evidence;
   int cluster_id = -1;
   bool outlier = false;
   std::uint8_t mapping_quality = 0;
@@ -127,6 +173,51 @@ struct FeatureExtractionResult {
   ReadFeature feature;
   std::vector<SvCall> svs;
 };
+
+struct SnpAggregate {
+  SnpCall call;
+  std::size_t alternate_depth = 0;
+  std::size_t reference_depth = 0;
+  std::size_t other_depth = 0;
+  std::size_t callable_depth = 0;
+  double heteroplasmy = 0.0;
+  double ci95_low = 0.0;
+  double ci95_high = 0.0;
+  std::vector<std::string> supporting_reads;
+};
+
+struct ResourceRecord {
+  std::string name;
+  std::string version;
+  std::string path;
+  std::string sha256;
+  std::string source;
+  std::string license;
+  std::string retrieved;
+};
+
+struct HaplogroupDefinition {
+  std::string name;
+  std::vector<std::pair<std::size_t, std::string>> mutations;
+  double expected_weight = 0.0;
+};
+
+struct HaplogroupCandidate {
+  std::string name;
+  double score = 0.0;
+  std::vector<std::string> matched;
+  std::vector<std::string> missing;
+  std::vector<std::string> extra;
+};
+
+struct ClusterHaplogroupAssignment {
+  std::string best = "unassigned";
+  double quality = 0.0;
+  bool contamination_warning = false;
+  std::vector<HaplogroupCandidate> candidates;
+};
+
+[[nodiscard]] bool looks_like_nuclear_contig(std::string_view reference_name);
 
 [[nodiscard]] std::string escape_json(std::string_view value) {
   std::string out;
@@ -231,7 +322,8 @@ void strip_trailing_carriage_return(std::string& value) {
     if (!line.empty() && line.front() == '>') {
       ++header_count;
       if (header_count > 1) {
-        throw std::runtime_error("reference FASTA must contain exactly one sequence: " + source);
+        throw AnalysisError(AnalysisErrorCode::reference_invalid,
+                            "reference FASTA must contain exactly one sequence: " + source);
       }
       continue;
     }
@@ -243,16 +335,19 @@ void strip_trailing_carriage_return(std::string& value) {
       if (upper == 'A' || upper == 'C' || upper == 'G' || upper == 'T' || upper == 'N') {
         reference.push_back(upper);
       } else {
-        throw std::runtime_error("reference FASTA contains an unsupported base: " + source);
+        throw AnalysisError(AnalysisErrorCode::reference_invalid,
+                            "reference FASTA contains an unsupported base: " + source);
       }
     }
   }
 
   if (header_count == 0) {
-    throw std::runtime_error("reference FASTA is missing a header: " + source);
+    throw AnalysisError(AnalysisErrorCode::reference_invalid,
+                        "reference FASTA is missing a header: " + source);
   }
   if (reference.empty()) {
-    throw std::runtime_error("reference FASTA is empty: " + source);
+    throw AnalysisError(AnalysisErrorCode::reference_invalid,
+                        "reference FASTA is empty: " + source);
   }
   return reference;
 }
@@ -278,22 +373,97 @@ void strip_trailing_carriage_return(std::string& value) {
 #endif
 }
 
+[[nodiscard]] std::string phylotree_path() {
+  if (const char* override_path = std::getenv("MITO_PHYLOTREE")) {
+    if (override_path[0] != '\0') {
+      return override_path;
+    }
+  }
+#ifdef MITO_PHYLOTREE_PATH
+  return MITO_PHYLOTREE_PATH;
+#else
+  return "core/data/phylotree-rcrs-17.3.xml";
+#endif
+}
+
+[[nodiscard]] std::string phylotree_weights_path() {
+  if (const char* override_path = std::getenv("MITO_PHYLOTREE_WEIGHTS")) {
+    if (override_path[0] != '\0') {
+      return override_path;
+    }
+  }
+#ifdef MITO_PHYLOTREE_WEIGHTS_PATH
+  return MITO_PHYLOTREE_WEIGHTS_PATH;
+#else
+  return "core/data/phylotree-rcrs-17.3-weights.txt";
+#endif
+}
+
+[[nodiscard]] std::string resource_manifest_path() {
+#ifdef MITO_RESOURCE_MANIFEST_PATH
+  return MITO_RESOURCE_MANIFEST_PATH;
+#else
+  return "core/data/resource_manifest.tsv";
+#endif
+}
+
+[[nodiscard]] std::vector<ResourceRecord> load_resource_manifest() {
+  std::vector<ResourceRecord> records;
+  std::ifstream input(resource_manifest_path());
+  if (!input) {
+    throw AnalysisError(AnalysisErrorCode::resource_open_failed,
+                        "could not open resource manifest: " + resource_manifest_path());
+  }
+  std::string line;
+  bool header = true;
+  while (std::getline(input, line)) {
+    strip_trailing_carriage_return(line);
+    if (line.empty() || header) {
+      header = false;
+      continue;
+    }
+    const auto fields = split_tab(line);
+    if (fields.size() != 7) {
+      throw AnalysisError(AnalysisErrorCode::resource_invalid,
+                          "resource manifest row must contain seven fields");
+    }
+    records.push_back({fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6]});
+  }
+  if (records.empty()) {
+    throw AnalysisError(AnalysisErrorCode::resource_invalid,
+                        "resource manifest contains no resources");
+  }
+  return records;
+}
+
 void throw_if_cancelled(const AnalysisConfig& config) {
   if (config.should_cancel && config.should_cancel()) {
-    throw std::runtime_error("analysis cancelled");
+    throw AnalysisError(AnalysisErrorCode::analysis_cancelled, "analysis cancelled");
   }
 }
 
 void validate_config(const AnalysisConfig& config) {
   if (!std::isfinite(config.cluster_epsilon) || config.cluster_epsilon < 0.0 ||
       config.cluster_epsilon > 1.0) {
-    throw std::invalid_argument("cluster_epsilon must be finite and between 0 and 1");
+    throw AnalysisError(AnalysisErrorCode::invalid_configuration,
+                        "cluster_epsilon must be finite and between 0 and 1");
+  }
+  if (!std::isfinite(config.numt_threshold) || config.numt_threshold < 0.0 ||
+      config.numt_threshold > 1.0) {
+    throw AnalysisError(AnalysisErrorCode::invalid_configuration,
+                        "numt_threshold must be finite and between 0 and 1");
   }
   if (config.min_cluster_size == 0) {
-    throw std::invalid_argument("min_cluster_size must be at least 1");
+    throw AnalysisError(AnalysisErrorCode::invalid_configuration,
+                        "min_cluster_size must be at least 1");
   }
   if (config.sv_min_length == 0) {
-    throw std::invalid_argument("sv_min_length must be at least 1");
+    throw AnalysisError(AnalysisErrorCode::invalid_configuration,
+                        "sv_min_length must be at least 1");
+  }
+  if (config.min_base_quality > 93U) {
+    throw AnalysisError(AnalysisErrorCode::invalid_configuration,
+                        "min_base_quality must not exceed Phred 93");
   }
 }
 
@@ -301,14 +471,16 @@ void validate_config(const AnalysisConfig& config) {
   const std::string effective_path = reference_path.empty() ? bundled_rcrs_path() : reference_path;
   std::ifstream in(effective_path);
   if (!in) {
-    throw std::runtime_error("could not open reference FASTA: " + effective_path);
+    throw AnalysisError(AnalysisErrorCode::reference_open_failed,
+                        "could not open reference FASTA: " + effective_path);
   }
 
   auto reference = parse_reference_fasta(in, effective_path);
   if (reference.size() != static_cast<std::size_t>(kDefaultReferenceLength) &&
       reference_path.empty()) {
-    throw std::runtime_error("bundled rCRS reference length is not 16569 bp: " +
-                             std::to_string(reference.size()));
+    throw AnalysisError(AnalysisErrorCode::reference_invalid,
+                        "bundled rCRS reference length is not 16569 bp: " +
+                            std::to_string(reference.size()));
   }
   return reference;
 }
@@ -359,16 +531,18 @@ void validate_config(const AnalysisConfig& config) {
     const auto length = parse_size(cigar.substr(number_start, i - number_start));
     constexpr std::string_view valid_operations = "MIDNSHP=X";
     if (!length || *length == 0 || valid_operations.find(cigar[i]) == std::string_view::npos) {
-      throw std::runtime_error("invalid CIGAR for read '" + std::string(read_id) + "': " +
-                               std::string(cigar));
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "invalid CIGAR for read '" + std::string(read_id) + "': " +
+                              std::string(cigar));
     }
     operations.push_back({*length, cigar[i]});
     number_start = i + 1;
   }
 
   if (number_start != cigar.size() || operations.empty()) {
-    throw std::runtime_error("invalid CIGAR for read '" + std::string(read_id) + "': " +
-                             std::string(cigar));
+    throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                        "invalid CIGAR for read '" + std::string(read_id) + "': " +
+                            std::string(cigar));
   }
   return operations;
 }
@@ -450,15 +624,44 @@ void validate_config(const AnalysisConfig& config) {
     if (fields.size() > 16) {
       call.mitomap_url = fields[16];
     }
-    annotations.emplace(snp_key(call.position, call.reference, call.alternate), std::move(call));
+    const auto key = snp_key(call.position, call.reference, call.alternate);
+    auto [it, inserted] = annotations.try_emplace(key, call);
+    if (!inserted) {
+      auto& existing = it->second;
+      const auto replace_if_present = [](std::string& target, const std::string& incoming) {
+        if (!incoming.empty()) {
+          target = incoming;
+        }
+      };
+      replace_if_present(existing.gene, call.gene);
+      replace_if_present(existing.consequence, call.consequence);
+      replace_if_present(existing.protein, call.protein);
+      replace_if_present(existing.residue, call.residue);
+      replace_if_present(existing.phenotype, call.phenotype);
+      replace_if_present(existing.pathogenicity, call.pathogenicity);
+      replace_if_present(existing.structure_id, call.structure_id);
+      replace_if_present(existing.structure_chain, call.structure_chain);
+      replace_if_present(existing.structure_complex, call.structure_complex);
+      replace_if_present(existing.clinvar_allele_id, call.clinvar_allele_id);
+      replace_if_present(existing.mitomap_url, call.mitomap_url);
+      if (call.structure_residue != 0) {
+        existing.structure_residue = call.structure_residue;
+      }
+      existing.references.insert(existing.references.end(), call.references.begin(), call.references.end());
+      existing.sources.insert(existing.sources.end(), call.sources.begin(), call.sources.end());
+      for (auto* values : {&existing.references, &existing.sources}) {
+        std::sort(values->begin(), values->end());
+        values->erase(std::unique(values->begin(), values->end()), values->end());
+      }
+    }
   }
 
   return annotations;
 }
 
-[[nodiscard]] std::vector<ReadRecord> parse_fastq(std::istream& input,
-                                                  const AnalysisConfig& config) {
-  std::vector<ReadRecord> reads;
+[[nodiscard]] InputRecords parse_fastq(std::istream& input,
+                                       const AnalysisConfig& config) {
+  InputRecords records;
   std::string header;
   std::string sequence;
   std::string plus;
@@ -471,70 +674,89 @@ void validate_config(const AnalysisConfig& config) {
       continue;
     }
     if (header.front() != '@') {
-      throw std::runtime_error("FASTQ parser expected a header starting with '@'");
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "FASTQ parser expected a header starting with '@'");
     }
     if (!std::getline(input, sequence) || !std::getline(input, plus) ||
         !std::getline(input, quality)) {
-      throw std::runtime_error("FASTQ record is truncated");
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed, "FASTQ record is truncated");
     }
     strip_trailing_carriage_return(sequence);
     strip_trailing_carriage_return(plus);
     strip_trailing_carriage_return(quality);
     if (plus.empty() || plus.front() != '+') {
-      throw std::runtime_error("FASTQ parser expected a separator starting with '+' for read '" +
-                               header.substr(1) + "'");
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "FASTQ parser expected a separator starting with '+' for read '" +
+                              header.substr(1) + "'");
     }
     if (sequence.empty()) {
-      throw std::runtime_error("FASTQ sequence is empty for read '" + header.substr(1) + "'");
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "FASTQ sequence is empty for read '" + header.substr(1) + "'");
     }
     if (quality.size() != sequence.size()) {
-      throw std::runtime_error("FASTQ sequence/quality length mismatch for read '" +
-                               header.substr(1) + "'");
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "FASTQ sequence/quality length mismatch for read '" +
+                              header.substr(1) + "'");
     }
     ReadRecord record;
     record.id = header.substr(1);
     record.sequence = sequence;
     record.qualities = quality;
-    reads.push_back(std::move(record));
+    records.reads.push_back(std::move(record));
   }
 
-  return reads;
+  return records;
 }
 
-[[nodiscard]] std::vector<ReadRecord> parse_sam(std::istream& input,
-                                                const AnalysisConfig& config) {
-  std::vector<ReadRecord> reads;
+[[nodiscard]] InputRecords parse_sam(std::istream& input,
+                                     const AnalysisConfig& config) {
+  InputRecords records;
+  records.alignment_input = true;
   std::string line;
   std::size_t line_number = 0;
   while (std::getline(input, line)) {
     throw_if_cancelled(config);
     ++line_number;
     strip_trailing_carriage_return(line);
+    if (line.rfind("@SQ\t", 0) == 0) {
+      const auto header_fields = split_tab(line);
+      for (const auto& field : header_fields) {
+        if (field.rfind("SN:", 0) == 0 && looks_like_nuclear_contig(field.substr(3))) {
+          records.has_nuclear_contigs = true;
+        }
+      }
+      continue;
+    }
     if (line.empty() || line.front() == '@') {
       continue;
     }
 
     const auto fields = split_tab(line);
     if (fields.size() < 11) {
-      throw std::runtime_error("SAM record has fewer than 11 fields at line " +
-                               std::to_string(line_number));
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "SAM record has fewer than 11 fields at line " +
+                              std::to_string(line_number));
     }
 
     const auto flags = parse_size(fields[1]);
     const auto reference_start = parse_size(fields[3]);
     const auto mapping_quality = parse_size(fields[4]);
     if (!flags || *flags > std::numeric_limits<std::uint16_t>::max()) {
-      throw std::runtime_error("invalid SAM FLAG at line " + std::to_string(line_number));
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "invalid SAM FLAG at line " + std::to_string(line_number));
     }
     if (!reference_start) {
-      throw std::runtime_error("invalid SAM POS at line " + std::to_string(line_number));
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "invalid SAM POS at line " + std::to_string(line_number));
     }
     if (!mapping_quality || *mapping_quality > std::numeric_limits<std::uint8_t>::max()) {
-      throw std::runtime_error("invalid SAM MAPQ at line " + std::to_string(line_number));
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "invalid SAM MAPQ at line " + std::to_string(line_number));
     }
     if (fields[9] != "*" && fields[10] != "*" && fields[9].size() != fields[10].size()) {
-      throw std::runtime_error("SAM sequence/quality length mismatch at line " +
-                               std::to_string(line_number));
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "SAM sequence/quality length mismatch at line " +
+                              std::to_string(line_number));
     }
 
     ReadRecord record;
@@ -553,21 +775,23 @@ void validate_config(const AnalysisConfig& config) {
         if (operation.code == 'M' || operation.code == 'I' || operation.code == 'S' ||
             operation.code == '=' || operation.code == 'X') {
           if (operation.length > std::numeric_limits<std::size_t>::max() - query_length) {
-            throw std::runtime_error("SAM CIGAR query length overflow at line " +
-                                     std::to_string(line_number));
+            throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                                "SAM CIGAR query length overflow at line " +
+                                    std::to_string(line_number));
           }
           query_length += operation.length;
         }
       }
       if (query_length != record.sequence.size()) {
-        throw std::runtime_error("SAM CIGAR/query length mismatch at line " +
-                                 std::to_string(line_number));
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "SAM CIGAR/query length mismatch at line " +
+                                std::to_string(line_number));
       }
     }
     record.aux_tags = parse_sam_aux_tags(fields);
-    reads.push_back(std::move(record));
+    records.reads.push_back(std::move(record));
   }
-  return reads;
+  return records;
 }
 
 #ifdef MITO_HAS_HTSLIB
@@ -575,35 +799,46 @@ class MitoFileReader {
 public:
   explicit MitoFileReader(std::string path) : path_(std::move(path)) {}
 
-  [[nodiscard]] std::vector<ReadRecord> read_all(const AnalysisConfig& config) const {
+  [[nodiscard]] InputRecords read_all(const AnalysisConfig& config) const {
     htsFile* raw_file = sam_open(path_.c_str(), "r");
     if (raw_file == nullptr) {
-      throw std::runtime_error("htslib could not open alignment file: " + path_);
+      throw AnalysisError(AnalysisErrorCode::input_open_failed,
+                          "htslib could not open alignment file: " + path_);
     }
     HtsFileHandle file(raw_file);
 
     bam_hdr_t* raw_header = sam_hdr_read(file.get());
     if (raw_header == nullptr) {
-      throw std::runtime_error("htslib could not read alignment header: " + path_);
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "htslib could not read alignment header: " + path_);
     }
     BamHeaderHandle header(raw_header);
 
     bam1_t* raw_record = bam_init1();
     if (raw_record == nullptr) {
-      throw std::runtime_error("htslib could not allocate BAM record");
+      throw AnalysisError(AnalysisErrorCode::resource_exhausted,
+                          "htslib could not allocate BAM record");
     }
     BamRecordHandle record(raw_record);
 
-    std::vector<ReadRecord> reads;
+    InputRecords records;
+    records.alignment_input = true;
+    for (int i = 0; i < header.get()->n_targets; ++i) {
+      if (looks_like_nuclear_contig(header.get()->target_name[i])) {
+        records.has_nuclear_contigs = true;
+        break;
+      }
+    }
     int read_status = 0;
     while ((read_status = sam_read1(file.get(), header.get(), record.get())) >= 0) {
       throw_if_cancelled(config);
-      reads.push_back(convert_record(*header.get(), *record.get()));
+      records.reads.push_back(convert_record(*header.get(), *record.get()));
     }
     if (read_status < -1) {
-      throw std::runtime_error("htslib failed while reading alignment records: " + path_);
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "htslib failed while reading alignment records: " + path_);
     }
-    return reads;
+    return records;
   }
 
 private:
@@ -720,11 +955,12 @@ private:
   });
 }
 
-[[nodiscard]] std::vector<ReadRecord> read_input(const std::string& input_path,
-                                                 const AnalysisConfig& config) {
+[[nodiscard]] InputRecords read_input(const std::string& input_path,
+                                      const AnalysisConfig& config) {
   const std::filesystem::path path(input_path);
   if (has_extension(path, {".fa", ".fas", ".fasta", ".fna"})) {
-    throw std::runtime_error("FASTA input is not supported; use FASTQ, SAM, BAM, or CRAM");
+    throw AnalysisError(AnalysisErrorCode::input_format_unsupported,
+                        "FASTA input is not supported; use FASTQ, SAM, BAM, or CRAM");
   }
 
 #ifdef MITO_HAS_HTSLIB
@@ -735,17 +971,71 @@ private:
 
   std::ifstream input(input_path, std::ios::binary);
   if (!input) {
-    throw std::runtime_error("could not open input file: " + input_path);
+    throw AnalysisError(AnalysisErrorCode::input_open_failed,
+                        "could not open input file: " + input_path);
   }
 
   if (has_extension(path, {".sam"})) {
     return parse_sam(input, config);
   }
   if (has_extension(path, {".bam", ".cram"})) {
-    throw std::runtime_error(
+    throw AnalysisError(
+        AnalysisErrorCode::dependency_unavailable,
         "BAM/CRAM support requires htslib; install htslib development headers and rebuild");
   }
   return parse_fastq(input, config);
+}
+
+[[nodiscard]] std::string alignment_as_sa(const ReadRecord& read) {
+  const char strand = (read.flags & 0x10U) != 0U ? '-' : '+';
+  const auto nm = read.aux_tags.find("NM");
+  return read.reference_name + "," + std::to_string(read.reference_start) + "," + strand + "," +
+         (read.cigar.empty() ? "*" : read.cigar) + "," +
+         std::to_string(static_cast<unsigned int>(read.mapping_quality)) + "," +
+         (nm == read.aux_tags.end() ? "0" : nm->second) + ";";
+}
+
+[[nodiscard]] std::vector<ReadRecord> collapse_molecule_alignments(InputRecords& input) {
+  if (!input.alignment_input) {
+    return std::move(input.reads);
+  }
+
+  std::map<std::string, std::vector<std::size_t>> groups;
+  for (std::size_t i = 0; i < input.reads.size(); ++i) {
+    groups[input.reads[i].id].push_back(i);
+  }
+
+  std::vector<ReadRecord> molecules;
+  molecules.reserve(groups.size());
+  for (const auto& [_, indices] : groups) {
+    std::size_t primary_index = indices.front();
+    for (const auto index : indices) {
+      const auto flags = input.reads[index].flags;
+      if ((flags & (0x100U | 0x800U)) == 0U) {
+        primary_index = index;
+        break;
+      }
+    }
+
+    ReadRecord primary = input.reads[primary_index];
+    std::string sa = primary.aux_tags.contains("SA") ? primary.aux_tags.at("SA") : std::string{};
+    for (const auto index : indices) {
+      if (index == primary_index || (input.reads[index].flags & 0x800U) == 0U ||
+          input.reads[index].reference_name.empty() || input.reads[index].reference_name == "*") {
+        continue;
+      }
+      const auto encoded = alignment_as_sa(input.reads[index]);
+      if (sa.find(encoded) == std::string::npos) {
+        sa += encoded;
+      }
+    }
+    if (!sa.empty()) {
+      primary.aux_tags["SA"] = std::move(sa);
+    }
+    primary.aux_tags["MA"] = std::to_string(indices.size());
+    molecules.push_back(std::move(primary));
+  }
+  return molecules;
 }
 
 [[nodiscard]] double mean_quality(const std::string& qualities) {
@@ -772,7 +1062,47 @@ private:
   return static_cast<double>(gc) / static_cast<double>(sequence.size());
 }
 
-[[nodiscard]] double numt_score(const ReadRecord& read, std::size_t reference_length) {
+[[nodiscard]] bool looks_like_nuclear_contig(std::string_view reference_name) {
+  std::string name(reference_name);
+  std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) {
+    return static_cast<char>(std::tolower(c));
+  });
+  if (name.rfind("chr", 0) == 0) {
+    name.erase(0, 3);
+  }
+  if (name == "x" || name == "y") {
+    return true;
+  }
+  const auto chromosome = parse_size(name);
+  return chromosome && *chromosome >= 1 && *chromosome <= 22;
+}
+
+[[nodiscard]] bool has_nuclear_supplementary_alignment(const ReadRecord& read) {
+  const auto sa = read.aux_tags.find("SA");
+  if (sa == read.aux_tags.end()) {
+    return false;
+  }
+  std::size_t start = 0;
+  while (start < sa->second.size()) {
+    const auto comma = sa->second.find(',', start);
+    if (comma == std::string::npos) {
+      break;
+    }
+    if (looks_like_nuclear_contig(std::string_view(sa->second).substr(start, comma - start))) {
+      return true;
+    }
+    const auto semicolon = sa->second.find(';', comma);
+    if (semicolon == std::string::npos) {
+      break;
+    }
+    start = semicolon + 1;
+  }
+  return false;
+}
+
+[[nodiscard]] std::vector<std::string> numt_evidence(const ReadRecord& read,
+                                                     std::size_t reference_length) {
+  std::vector<std::string> evidence;
   const std::string id_lower = [&] {
     std::string out = read.id;
     std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) {
@@ -782,7 +1112,13 @@ private:
   }();
 
   if (id_lower.find("numt") != std::string::npos || id_lower.find("nuclear") != std::string::npos) {
-    return 0.82;
+    evidence.emplace_back("read_name_heuristic");
+  }
+  if (looks_like_nuclear_contig(read.reference_name)) {
+    evidence.emplace_back("primary_nuclear_alignment");
+  }
+  if (has_nuclear_supplementary_alignment(read)) {
+    evidence.emplace_back("supplementary_nuclear_alignment");
   }
 
   const double length_ratio = reference_length == 0
@@ -790,14 +1126,31 @@ private:
                                   : static_cast<double>(read.sequence.size()) /
                                         static_cast<double>(reference_length);
   const double gc = gc_fraction(read.sequence);
-  double score = 0.05;
   if (length_ratio > 1.20) {
-    score += 0.30;
+    evidence.emplace_back("length_exceeds_mtdna");
   }
   if (gc > 0.62 || gc < 0.25) {
-    score += 0.18;
+    evidence.emplace_back("atypical_gc_fraction");
   }
-  return std::min(0.95, score);
+  return evidence;
+}
+
+[[nodiscard]] double numt_score(const std::vector<std::string>& evidence) {
+  double score = 0.05;
+  for (const auto& item : evidence) {
+    if (item == "primary_nuclear_alignment") {
+      score = std::max(score, 0.99);
+    } else if (item == "supplementary_nuclear_alignment") {
+      score = std::max(score, 0.90);
+    } else if (item == "read_name_heuristic") {
+      score = std::max(score, 0.82);
+    } else if (item == "length_exceeds_mtdna") {
+      score += 0.30;
+    } else if (item == "atypical_gc_fraction") {
+      score += 0.18;
+    }
+  }
+  return std::min(0.99, score);
 }
 
 [[nodiscard]] bool is_base(char base) {
@@ -805,12 +1158,48 @@ private:
   return base == 'A' || base == 'C' || base == 'G' || base == 'T';
 }
 
+[[nodiscard]] bool passes_snp_alignment_filters(const ReadRecord& read,
+                                                const AnalysisConfig& config) {
+  return (read.flags & 0x4U) == 0U &&
+         (read.flags & config.excluded_snp_flags) == 0U &&
+         read.mapping_quality >= config.min_mapping_quality && read.reference_start != 0 &&
+         !read.reference_name.empty() && read.reference_name != "*" &&
+         !looks_like_nuclear_contig(read.reference_name);
+}
+
+[[nodiscard]] std::optional<std::uint8_t> phred_quality_at(const ReadRecord& read,
+                                                           std::size_t query_index) {
+  if (query_index >= read.sequence.size() || query_index >= read.qualities.size()) {
+    return std::nullopt;
+  }
+  const auto encoded = static_cast<unsigned char>(read.qualities[query_index]);
+  if (encoded < 33U || encoded > 126U) {
+    return std::nullopt;
+  }
+  return static_cast<std::uint8_t>(encoded - 33U);
+}
+
+[[nodiscard]] std::optional<std::size_t> base_index(char base) {
+  switch (static_cast<char>(std::toupper(static_cast<unsigned char>(base)))) {
+  case 'A':
+    return 0;
+  case 'C':
+    return 1;
+  case 'G':
+    return 2;
+  case 'T':
+    return 3;
+  default:
+    return std::nullopt;
+  }
+}
+
 [[nodiscard]] std::vector<SnpCall> call_snps_from_alignment(const ReadRecord& read,
-                                                            const std::string& reference) {
+                                                            const std::string& reference,
+                                                            const AnalysisConfig& config) {
   std::vector<SnpCall> snps;
   if (reference.empty() || read.sequence.empty() || read.cigar_operations.empty() ||
-      (read.flags & 0x4U) != 0U || read.reference_start == 0 || read.reference_name.empty() ||
-      read.reference_name == "*") {
+      !passes_snp_alignment_filters(read, config)) {
     return snps;
   }
 
@@ -827,7 +1216,9 @@ private:
         const char reference_base = reference[position - 1];
         const char alternate_base = static_cast<char>(
             std::toupper(static_cast<unsigned char>(read.sequence[read_cursor + offset])));
-        if (is_base(alternate_base) && is_base(reference_base) && alternate_base != reference_base) {
+        const auto quality = phred_quality_at(read, read_cursor + offset);
+        if (quality && *quality >= config.min_base_quality && is_base(alternate_base) &&
+            is_base(reference_base) && alternate_base != reference_base) {
           SnpCall call;
           call.position = position;
           call.reference = reference_base;
@@ -863,10 +1254,11 @@ private:
 }
 
 [[nodiscard]] std::vector<SnpCall> call_snps_from_reference_span(const ReadRecord& read,
-                                                                 const std::string& reference) {
+                                                                 const std::string& reference,
+                                                                 const AnalysisConfig& config) {
   std::vector<SnpCall> snps;
   if (reference.empty() || read.sequence.empty() || read.reference_start == 0 ||
-      read.reference_name.empty()) {
+      read.reference_name.empty() || !passes_snp_alignment_filters(read, config)) {
     return snps;
   }
 
@@ -875,7 +1267,9 @@ private:
     const char reference_base = reference[position - 1];
     const char alternate_base =
         static_cast<char>(std::toupper(static_cast<unsigned char>(read.sequence[i])));
-    if (is_base(alternate_base) && is_base(reference_base) && alternate_base != reference_base) {
+    const auto quality = phred_quality_at(read, i);
+    if (quality && *quality >= config.min_base_quality && is_base(alternate_base) &&
+        is_base(reference_base) && alternate_base != reference_base) {
         SnpCall call;
         call.position = position;
         call.reference = reference_base;
@@ -1008,11 +1402,17 @@ void write_string_map(std::ostringstream& out, const std::map<std::string, std::
   std::transform(sv.type.begin(), sv.type.end(), sv.type.begin(), [](unsigned char c) {
     return static_cast<char>(std::tolower(c));
   });
+  if (sv.type == "del") {
+    sv.type = "deletion";
+  } else if (sv.type == "ins") {
+    sv.type = "insertion";
+  }
   sv.start = *start;
   sv.end = *end;
   sv.length = sv.end - sv.start + 1;
   sv.supporting_reads.emplace_back(read_id);
-  sv.known_event = sv.type == "del" && sv.start >= 8400 && sv.start <= 8500 &&
+  sv.evidence_sources.emplace_back("development_tag");
+  sv.known_event = sv.type == "deletion" && sv.start >= 8400 && sv.start <= 8500 &&
                    sv.end >= 13400 && sv.end <= 13550;
   sv.id = sv.type + ":" + std::to_string(sv.start) + "-" + std::to_string(sv.end);
   return sv;
@@ -1035,10 +1435,12 @@ void write_string_map(std::ostringstream& out, const std::map<std::string, std::
 }
 
 [[nodiscard]] std::vector<SvCall> parse_cigar_svs(const ReadRecord& read,
-                                                  std::size_t sv_min_length) {
+                                                  std::size_t sv_min_length,
+                                                  std::size_t reference_length) {
   std::vector<SvCall> calls;
   if (read.cigar_operations.empty() || (read.flags & 0x4U) != 0U ||
-      read.reference_start == 0 || read.reference_name.empty() || read.reference_name == "*") {
+      read.reference_start == 0 || read.reference_name.empty() || read.reference_name == "*" ||
+      looks_like_nuclear_contig(read.reference_name)) {
     return calls;
   }
 
@@ -1048,8 +1450,9 @@ void write_string_map(std::ostringstream& out, const std::map<std::string, std::
     const char op = operation.code;
     if ((op == 'D' || op == 'N') && len >= sv_min_length) {
       if (len - 1U > std::numeric_limits<std::size_t>::max() - reference_cursor) {
-        throw std::overflow_error("CIGAR structural-variant coordinate overflow for read '" +
-                                  read.id + "'");
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "CIGAR structural-variant coordinate overflow for read '" + read.id +
+                                "'");
       }
       SvCall sv;
       sv.type = "deletion";
@@ -1057,6 +1460,7 @@ void write_string_map(std::ostringstream& out, const std::map<std::string, std::
       sv.end = reference_cursor + len - 1;
       sv.length = len;
       sv.supporting_reads.emplace_back(read.id);
+      sv.evidence_sources.emplace_back("cigar");
       sv.known_event = sv.start >= 8400 && sv.start <= 8500 && sv.end >= 13400 &&
                        sv.end <= 13550;
       sv.id = "deletion:" + std::to_string(sv.start) + "-" + std::to_string(sv.end);
@@ -1064,29 +1468,32 @@ void write_string_map(std::ostringstream& out, const std::map<std::string, std::
     } else if (op == 'I' && len >= sv_min_length) {
       SvCall sv;
       sv.type = "insertion";
-      sv.start = reference_cursor;
-      sv.end = reference_cursor;
+      sv.start = reference_cursor > 1U ? reference_cursor - 1U : reference_length;
+      sv.end = sv.start;
       sv.length = len;
       sv.supporting_reads.emplace_back(read.id);
+      sv.evidence_sources.emplace_back("cigar");
       sv.id = "insertion:" + std::to_string(sv.start) + "+" + std::to_string(len);
       calls.push_back(std::move(sv));
     } else if (op == 'S' && len >= sv_min_length) {
       SvCall sv;
-      sv.type = reference_cursor == (read.reference_start == 0 ? 1 : read.reference_start)
-                    ? "soft_clip_left"
-                    : "soft_clip_right";
-      sv.start = reference_cursor;
+      const bool leading =
+          reference_cursor == (read.reference_start == 0 ? 1 : read.reference_start);
+      sv.type = leading ? "soft_clip_left" : "soft_clip_right";
+      sv.start = leading ? reference_cursor
+                         : (reference_cursor > 1U ? reference_cursor - 1U : reference_length);
       sv.end = reference_cursor;
       sv.length = len;
       sv.supporting_reads.emplace_back(read.id);
+      sv.evidence_sources.emplace_back("cigar");
       sv.id = sv.type + ":" + std::to_string(sv.start) + "+" + std::to_string(len);
       calls.push_back(std::move(sv));
     }
 
     if (op == 'M' || op == '=' || op == 'X' || op == 'D' || op == 'N') {
       if (len > std::numeric_limits<std::size_t>::max() - reference_cursor) {
-        throw std::overflow_error("CIGAR reference coordinate overflow for read '" + read.id +
-                                  "'");
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "CIGAR reference coordinate overflow for read '" + read.id + "'");
       }
       reference_cursor += len;
     }
@@ -1095,17 +1502,287 @@ void write_string_map(std::ostringstream& out, const std::map<std::string, std::
   return calls;
 }
 
+struct AlignmentSegment {
+  std::string reference_name;
+  std::size_t reference_start = 0;
+  std::size_t reference_end = 0;
+  std::size_t query_start = 0;
+  std::size_t query_end = 0;
+  char strand = '+';
+  std::uint8_t mapping_quality = 0;
+};
+
+[[nodiscard]] bool is_mitochondrial_contig(std::string_view name) {
+  std::string normalized(name);
+  std::transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char c) {
+    return static_cast<char>(std::tolower(c));
+  });
+  return normalized == "mt" || normalized == "chrm" || normalized == "m" ||
+         normalized == "nc_012920.1" || normalized == "nc_012920";
+}
+
+[[nodiscard]] std::optional<AlignmentSegment> make_alignment_segment(
+    std::string reference_name,
+    std::size_t reference_start,
+    char strand,
+    std::uint8_t mapping_quality,
+    const std::vector<CigarOperation>& operations) {
+  if (!is_mitochondrial_contig(reference_name) || reference_start == 0 || operations.empty()) {
+    return std::nullopt;
+  }
+  std::size_t leading_clip = 0;
+  std::size_t query_extent = 0;
+  std::size_t query_aligned = 0;
+  std::size_t reference_span = 0;
+  bool seen_alignment = false;
+  for (const auto& operation : operations) {
+    if (operation.code == 'M' || operation.code == 'I' || operation.code == 'S' ||
+        operation.code == 'H' || operation.code == '=' || operation.code == 'X') {
+      if (operation.length > std::numeric_limits<std::size_t>::max() - query_extent) {
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "alignment query extent overflow");
+      }
+      query_extent += operation.length;
+    }
+    if (!seen_alignment && (operation.code == 'S' || operation.code == 'H')) {
+      if (operation.length > std::numeric_limits<std::size_t>::max() - leading_clip) {
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "alignment query coordinate overflow");
+      }
+      leading_clip += operation.length;
+      continue;
+    }
+    if (operation.code == 'M' || operation.code == '=' || operation.code == 'X') {
+      seen_alignment = true;
+      if (operation.length > std::numeric_limits<std::size_t>::max() - query_aligned ||
+          operation.length > std::numeric_limits<std::size_t>::max() - reference_span) {
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "alignment segment length overflow");
+      }
+      query_aligned += operation.length;
+      reference_span += operation.length;
+    } else if (operation.code == 'I') {
+      seen_alignment = true;
+      if (operation.length > std::numeric_limits<std::size_t>::max() - query_aligned) {
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "alignment query length overflow");
+      }
+      query_aligned += operation.length;
+    } else if (operation.code == 'D' || operation.code == 'N') {
+      seen_alignment = true;
+      if (operation.length > std::numeric_limits<std::size_t>::max() - reference_span) {
+        throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                            "alignment reference length overflow");
+      }
+      reference_span += operation.length;
+    }
+  }
+  if (query_aligned == 0 || reference_span == 0) {
+    return std::nullopt;
+  }
+  if (leading_clip > query_extent || query_aligned > query_extent - leading_clip) {
+    throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                        "alignment clipping exceeds query extent");
+  }
+  const auto query_start =
+      strand == '+' ? leading_clip : query_extent - leading_clip - query_aligned;
+  if (reference_span - 1U > std::numeric_limits<std::size_t>::max() - reference_start ||
+      query_aligned - 1U > std::numeric_limits<std::size_t>::max() - query_start) {
+    throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                        "alignment segment coordinate overflow");
+  }
+  return AlignmentSegment{std::move(reference_name),
+                          reference_start,
+                          reference_start + reference_span - 1U,
+                          query_start,
+                          query_start + query_aligned - 1U,
+                          strand,
+                          mapping_quality};
+}
+
+[[nodiscard]] std::vector<AlignmentSegment> alignment_segments(const ReadRecord& read) {
+  std::vector<AlignmentSegment> segments;
+  if (const auto primary = make_alignment_segment(
+          read.reference_name, read.reference_start, (read.flags & 0x10U) != 0U ? '-' : '+',
+          read.mapping_quality, read.cigar_operations)) {
+    segments.push_back(*primary);
+  }
+  const auto sa = read.aux_tags.find("SA");
+  if (sa == read.aux_tags.end()) {
+    return segments;
+  }
+  for (const auto& encoded : split_semicolon(sa->second)) {
+    std::vector<std::string> fields;
+    std::size_t start = 0;
+    while (start <= encoded.size()) {
+      const auto comma = encoded.find(',', start);
+      fields.emplace_back(encoded.substr(start, comma == std::string::npos ? std::string::npos
+                                                                          : comma - start));
+      if (comma == std::string::npos) {
+        break;
+      }
+      start = comma + 1;
+    }
+    if (fields.size() < 5) {
+      continue;
+    }
+    const auto position = parse_size(fields[1]);
+    const auto mapq = parse_size(fields[4]);
+    if (!position || !mapq || *mapq > std::numeric_limits<std::uint8_t>::max() ||
+        (fields[2] != "+" && fields[2] != "-")) {
+      continue;
+    }
+    try {
+      const auto operations = parse_cigar(fields[3], read.id + " SA");
+      if (const auto segment = make_alignment_segment(fields[0], *position, fields[2].front(),
+                                                      static_cast<std::uint8_t>(*mapq), operations)) {
+        segments.push_back(*segment);
+      }
+    } catch (const std::runtime_error&) {
+      // Malformed optional SA evidence is ignored; the primary alignment remains usable.
+    }
+  }
+  std::sort(segments.begin(), segments.end(), [](const auto& lhs, const auto& rhs) {
+    return std::tie(lhs.query_start, lhs.query_end, lhs.reference_start, lhs.strand) <
+           std::tie(rhs.query_start, rhs.query_end, rhs.reference_start, rhs.strand);
+  });
+  segments.erase(std::unique(segments.begin(), segments.end(), [](const auto& lhs, const auto& rhs) {
+                   return lhs.query_start == rhs.query_start && lhs.query_end == rhs.query_end &&
+                          lhs.reference_start == rhs.reference_start && lhs.reference_end == rhs.reference_end &&
+                          lhs.strand == rhs.strand;
+                 }),
+                 segments.end());
+  return segments;
+}
+
+[[nodiscard]] std::vector<SvCall> split_alignment_svs(const ReadRecord& read,
+                                                      std::size_t reference_length,
+                                                      std::size_t sv_min_length) {
+  std::vector<SvCall> calls;
+  const auto segments = alignment_segments(read);
+  if (segments.size() < 2 || reference_length == 0) {
+    return calls;
+  }
+  for (std::size_t i = 1; i < segments.size(); ++i) {
+    const auto& previous = segments[i - 1];
+    const auto& current = segments[i];
+    const auto query_gap = static_cast<std::int64_t>(current.query_start) -
+                           static_cast<std::int64_t>(previous.query_end) - 1;
+    SvCall event;
+    event.supporting_reads.push_back(read.id);
+    event.evidence_sources.emplace_back("split_alignment");
+    event.segment_count = segments.size();
+    event.orientations.push_back(std::string(1, previous.strand) + "/" + current.strand);
+
+    const auto leaving_position = previous.strand == '+' ? previous.reference_end
+                                                         : previous.reference_start;
+    const auto entering_position = current.strand == '+' ? current.reference_start
+                                                         : current.reference_end;
+    if (leaving_position > reference_length || entering_position > reference_length) {
+      throw AnalysisError(AnalysisErrorCode::input_parse_failed,
+                          "split alignment coordinate exceeds the mitochondrial reference for "
+                          "read '" +
+                              read.id + "'");
+    }
+
+    if (previous.strand != current.strand) {
+      event.type = "inversion";
+      event.start = std::min(leaving_position, entering_position);
+      event.end = std::max(leaving_position, entering_position);
+      event.length = event.end - event.start + 1U;
+    } else {
+      const bool forward = previous.strand == '+';
+      const bool follows_linear_reference =
+          forward ? entering_position > leaving_position : entering_position < leaving_position;
+      const auto linear_gap = follows_linear_reference
+                                  ? (forward ? entering_position - leaving_position - 1U
+                                             : leaving_position - entering_position - 1U)
+                                  : 0U;
+      const auto overlap = follows_linear_reference
+                               ? 0U
+                               : (forward ? leaving_position - entering_position + 1U
+                                          : entering_position - leaving_position + 1U);
+      const auto circular_gap = follows_linear_reference
+                                    ? reference_length
+                                    : (forward ? reference_length - leaving_position +
+                                                     entering_position - 1U
+                                               : leaving_position - 1U + reference_length -
+                                                     entering_position);
+      const bool crosses_origin = !follows_linear_reference && circular_gap < overlap;
+      const bool ambiguous_topology =
+          !follows_linear_reference && circular_gap == overlap;
+
+      if (crosses_origin) {
+        event.type = "circular_origin";
+        event.start = std::max(leaving_position, entering_position);
+        event.end = std::min(leaving_position, entering_position);
+        event.length = circular_gap;
+      } else if (ambiguous_topology && overlap >= sv_min_length) {
+        event.type = "ambiguous_adjacency";
+        event.start = std::min(leaving_position, entering_position);
+        event.end = std::max(leaving_position, entering_position);
+        event.length = overlap;
+      } else if (follows_linear_reference && linear_gap >= sv_min_length) {
+        event.type = "deletion";
+        event.start = std::min(leaving_position, entering_position) + 1U;
+        event.end = std::max(leaving_position, entering_position) - 1U;
+        event.length = linear_gap;
+      } else if (!follows_linear_reference && overlap >= sv_min_length) {
+        event.type = "duplication";
+        event.start = std::min(leaving_position, entering_position);
+        event.end = std::max(leaving_position, entering_position);
+        event.length = overlap;
+      } else if (query_gap >= static_cast<std::int64_t>(sv_min_length)) {
+        event.type = "insertion";
+        event.start = std::min(leaving_position, entering_position);
+        event.end = event.start;
+        event.length = static_cast<std::size_t>(query_gap);
+      } else {
+        continue;
+      }
+    }
+    event.known_event = event.type == "deletion" && event.start >= 8400 &&
+                        event.start <= 8500 && event.end >= 13400 && event.end <= 13550;
+    if (event.type == "insertion") {
+      event.id = event.type + ":" + std::to_string(event.start) + "+" +
+                 std::to_string(event.length);
+    } else {
+      event.id = event.type + ":" + std::to_string(event.start) + "-" +
+                 std::to_string(event.end);
+    }
+    calls.push_back(std::move(event));
+  }
+  return calls;
+}
+
 void merge_sv(std::map<std::string, SvCall>& svs, SvCall sv) {
   const auto existing = svs.find(sv.id);
   if (existing == svs.end()) {
+    for (auto* values : {&sv.supporting_reads, &sv.evidence_sources, &sv.orientations}) {
+      std::sort(values->begin(), values->end());
+      values->erase(std::unique(values->begin(), values->end()), values->end());
+    }
     svs.emplace(sv.id, std::move(sv));
     return;
   }
 
-  auto& support = existing->second.supporting_reads;
-  support.insert(support.end(), sv.supporting_reads.begin(), sv.supporting_reads.end());
-  std::sort(support.begin(), support.end());
-  support.erase(std::unique(support.begin(), support.end()), support.end());
+  auto& merged = existing->second;
+  if (merged.type != sv.type || merged.start != sv.start || merged.end != sv.end ||
+      merged.length != sv.length) {
+    throw AnalysisError(AnalysisErrorCode::internal_error,
+                        "canonical SV ID collision for '" + sv.id + "'");
+  }
+  const auto merge_unique = [](std::vector<std::string>& target,
+                               const std::vector<std::string>& incoming) {
+    target.insert(target.end(), incoming.begin(), incoming.end());
+    std::sort(target.begin(), target.end());
+    target.erase(std::unique(target.begin(), target.end()), target.end());
+  };
+  merge_unique(merged.supporting_reads, sv.supporting_reads);
+  merge_unique(merged.evidence_sources, sv.evidence_sources);
+  merge_unique(merged.orientations, sv.orientations);
+  merged.known_event = merged.known_event || sv.known_event;
+  merged.segment_count = std::max(merged.segment_count, sv.segment_count);
 }
 
 [[nodiscard]] std::size_t effective_thread_count(std::size_t requested_threads,
@@ -1130,35 +1807,49 @@ void merge_sv(std::map<std::string, SvCall>& svs, SvCall sv) {
   feature.id = read.id;
   feature.length = read.sequence.size();
   feature.mean_quality = mean_quality(read.qualities);
-  feature.numt_score = numt_score(read, reference.size());
-  feature.filtered_numt = config.filter_numt && feature.numt_score > 0.30;
+  feature.numt_evidence = numt_evidence(read, reference.size());
+  feature.numt_score = numt_score(feature.numt_evidence);
+  feature.filtered_numt = config.filter_numt && feature.numt_score > config.numt_threshold;
   feature.mapping_quality = read.mapping_quality;
   feature.flags = read.flags;
   feature.reference_name = read.reference_name;
   feature.aux_tags = read.aux_tags;
 
   if (!feature.filtered_numt) {
-    feature.snps = call_snps_from_alignment(read, reference);
+    feature.snps = call_snps_from_alignment(read, reference, config);
     if (feature.snps.empty() && read.cigar.empty()) {
-      feature.snps = call_snps_from_reference_span(read, reference);
+      feature.snps = call_snps_from_reference_span(read, reference, config);
     }
-    merge_snps(feature.snps, snp_tags_from_header(read));
+    if (config.allow_development_tags) {
+      merge_snps(feature.snps, snp_tags_from_header(read));
+    }
     if (std::any_of(feature.snps.begin(), feature.snps.end(), [&](const auto& snp) {
           return snp.position == 0 || snp.position > reference.size();
         })) {
-      throw std::runtime_error("SNP coordinate is outside the reference for read '" + read.id +
-                               "'");
+      throw AnalysisError(AnalysisErrorCode::internal_error,
+                          "SNP coordinate is outside the reference for read '" + read.id + "'");
     }
     apply_clinical_annotations(feature.snps, clinical_annotations);
-    result.svs = sv_tags_from_header(read);
-    auto cigar_svs = parse_cigar_svs(read, config.sv_min_length);
+    if (config.allow_development_tags) {
+      result.svs = sv_tags_from_header(read);
+    }
+    auto cigar_svs = parse_cigar_svs(read, config.sv_min_length, reference.size());
+    auto split_svs = split_alignment_svs(read, reference.size(), config.sv_min_length);
+    if (!split_svs.empty()) {
+      cigar_svs.erase(std::remove_if(cigar_svs.begin(), cigar_svs.end(), [](const auto& sv) {
+                         return sv.type == "soft_clip_left" || sv.type == "soft_clip_right";
+                       }),
+                       cigar_svs.end());
+    }
     result.svs.insert(result.svs.end(), std::make_move_iterator(cigar_svs.begin()),
                       std::make_move_iterator(cigar_svs.end()));
+    result.svs.insert(result.svs.end(), std::make_move_iterator(split_svs.begin()),
+                      std::make_move_iterator(split_svs.end()));
     if (std::any_of(result.svs.begin(), result.svs.end(), [&](const auto& sv) {
           return sv.start == 0 || sv.end > reference.size();
         })) {
-      throw std::runtime_error("SV coordinate is outside the reference for read '" + read.id +
-                               "'");
+      throw AnalysisError(AnalysisErrorCode::internal_error,
+                          "SV coordinate is outside the reference for read '" + read.id + "'");
     }
 
     feature.sv_ids.reserve(result.svs.size());
@@ -1166,6 +1857,8 @@ void merge_sv(std::map<std::string, SvCall>& svs, SvCall sv) {
       feature.sv_ids.push_back(sv.id);
     }
     std::sort(feature.sv_ids.begin(), feature.sv_ids.end());
+    feature.sv_ids.erase(std::unique(feature.sv_ids.begin(), feature.sv_ids.end()),
+                         feature.sv_ids.end());
   }
 
   return result;
@@ -1516,7 +2209,7 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
 
   const auto complete_cycles = static_cast<std::uint64_t>(length / reference_length);
   if (complete_cycles > std::numeric_limits<std::uint64_t>::max() - uniform_depth) {
-    throw std::overflow_error("coverage depth overflow");
+    throw AnalysisError(AnalysisErrorCode::resource_exhausted, "coverage depth overflow");
   }
   uniform_depth += complete_cycles;
   const std::size_t remainder = length % reference_length;
@@ -1555,7 +2248,7 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
     if (read_index >= features.size() || features[read_index].filtered_numt ||
         (read.flags & 0x4U) != 0U || read.reference_start == 0 ||
         read.reference_name.empty() || read.reference_name == "*" ||
-        read.cigar_operations.empty()) {
+        read.cigar_operations.empty() || looks_like_nuclear_contig(read.reference_name)) {
       continue;
     }
 
@@ -1580,15 +2273,17 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
   for (std::size_t i = 0; i < reference_length; ++i) {
     running_delta += difference[i];
     if (running_delta < 0) {
-      throw std::runtime_error("internal coverage accumulator underflow");
+      throw AnalysisError(AnalysisErrorCode::internal_error,
+                          "internal coverage accumulator underflow");
     }
     const auto variable_depth = static_cast<std::uint64_t>(running_delta);
     if (variable_depth > std::numeric_limits<std::uint64_t>::max() - uniform_depth) {
-      throw std::overflow_error("coverage depth overflow");
+      throw AnalysisError(AnalysisErrorCode::resource_exhausted, "coverage depth overflow");
     }
     const auto depth = uniform_depth + variable_depth;
     if (depth > std::numeric_limits<std::size_t>::max()) {
-      throw std::overflow_error("coverage depth exceeds platform size limit");
+      throw AnalysisError(AnalysisErrorCode::resource_exhausted,
+                          "coverage depth exceeds platform size limit");
     }
     site_depth[i] = depth;
     total_depth += static_cast<long double>(depth);
@@ -1627,15 +2322,441 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
   return result;
 }
 
+[[nodiscard]] std::map<std::string, SnpAggregate> aggregate_snps(
+    const std::vector<ReadRecord>& reads,
+    const std::vector<ReadFeature>& features,
+    const AnalysisConfig& config,
+    std::size_t reference_length) {
+  std::map<std::string, SnpAggregate> aggregates;
+  std::unordered_set<std::size_t> target_positions;
+  for (const auto& feature : features) {
+    if (feature.filtered_numt) {
+      continue;
+    }
+    for (const auto& snp : feature.snps) {
+      const auto key = snp_key(snp.position, snp.reference, snp.alternate);
+      auto [it, inserted] = aggregates.try_emplace(key);
+      if (inserted) {
+        it->second.call = snp;
+      }
+      target_positions.insert(snp.position);
+    }
+  }
+
+  std::unordered_map<std::size_t, std::vector<SnpAggregate*>> aggregates_by_position;
+  aggregates_by_position.reserve(target_positions.size());
+  for (auto& [_, aggregate] : aggregates) {
+    aggregates_by_position[aggregate.call.position].push_back(&aggregate);
+  }
+
+  std::unordered_map<std::size_t, std::array<std::size_t, 4>> allele_depths;
+  allele_depths.reserve(target_positions.size());
+  for (std::size_t read_index = 0; read_index < reads.size(); ++read_index) {
+    throw_if_cancelled(config);
+    if (read_index >= features.size() || features[read_index].filtered_numt) {
+      continue;
+    }
+    const auto& read = reads[read_index];
+    if (!passes_snp_alignment_filters(read, config) || read.cigar_operations.empty() ||
+        reference_length == 0) {
+      continue;
+    }
+
+    std::unordered_map<std::size_t, char> molecule_alleles;
+    molecule_alleles.reserve(target_positions.size());
+    std::size_t query_cursor = 0;
+    std::size_t reference_cursor = ((read.reference_start - 1U) % reference_length) + 1U;
+    for (const auto& operation : read.cigar_operations) {
+      const auto len = operation.length;
+      const char op = operation.code;
+      if (op == 'M' || op == '=' || op == 'X') {
+        for (std::size_t offset = 0; offset < len && query_cursor + offset < read.sequence.size();
+             ++offset) {
+          const std::size_t position = ((reference_cursor - 1U + offset) % reference_length) + 1U;
+          if (!target_positions.contains(position)) {
+            continue;
+          }
+          const auto quality = phred_quality_at(read, query_cursor + offset);
+          const char base = static_cast<char>(
+              std::toupper(static_cast<unsigned char>(read.sequence[query_cursor + offset])));
+          if (!quality || *quality < config.min_base_quality || !base_index(base)) {
+            continue;
+          }
+          auto [it, inserted] = molecule_alleles.try_emplace(position, base);
+          if (!inserted && it->second != base) {
+            it->second = 'N';
+          }
+        }
+        query_cursor += len;
+        reference_cursor =
+            ((reference_cursor - 1U + (len % reference_length)) % reference_length) + 1U;
+      } else if (op == 'I' || op == 'S') {
+        query_cursor += len;
+      } else if (op == 'D' || op == 'N') {
+        reference_cursor =
+            ((reference_cursor - 1U + (len % reference_length)) % reference_length) + 1U;
+      }
+    }
+
+    for (const auto& [position, base] : molecule_alleles) {
+      if (const auto index = base_index(base)) {
+        ++allele_depths[position][*index];
+        const auto position_aggregates = aggregates_by_position.find(position);
+        if (position_aggregates != aggregates_by_position.end()) {
+          for (auto* aggregate : position_aggregates->second) {
+            if (base == aggregate->call.alternate) {
+              aggregate->supporting_reads.push_back(features[read_index].id);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  constexpr double z = 1.959963984540054;
+  for (auto& [_, aggregate] : aggregates) {
+    auto& support = aggregate.supporting_reads;
+    std::sort(support.begin(), support.end());
+    support.erase(std::unique(support.begin(), support.end()), support.end());
+    const auto depths_it = allele_depths.find(aggregate.call.position);
+    if (depths_it == allele_depths.end()) {
+      continue;
+    }
+    const auto& depths = depths_it->second;
+    aggregate.callable_depth = std::accumulate(depths.begin(), depths.end(), std::size_t{0});
+    if (const auto alternate = base_index(aggregate.call.alternate)) {
+      aggregate.alternate_depth = depths[*alternate];
+    }
+    if (const auto reference = base_index(aggregate.call.reference)) {
+      aggregate.reference_depth = depths[*reference];
+    }
+    aggregate.other_depth = aggregate.callable_depth - aggregate.alternate_depth - aggregate.reference_depth;
+    if (aggregate.callable_depth == 0) {
+      continue;
+    }
+    const double n = static_cast<double>(aggregate.callable_depth);
+    const double proportion = static_cast<double>(aggregate.alternate_depth) / n;
+    aggregate.heteroplasmy = proportion;
+    const double z2 = z * z;
+    const double denominator = 1.0 + z2 / n;
+    const double center = (proportion + z2 / (2.0 * n)) / denominator;
+    const double margin =
+        z * std::sqrt((proportion * (1.0 - proportion) / n) + (z2 / (4.0 * n * n))) /
+        denominator;
+    aggregate.ci95_low = std::max(0.0, center - margin);
+    aggregate.ci95_high = std::min(1.0, center + margin);
+  }
+  return aggregates;
+}
+
+[[nodiscard]] std::optional<std::pair<std::size_t, char>> phylo_snv(std::string_view token) {
+  std::size_t digit_count = 0;
+  while (digit_count < token.size() &&
+         std::isdigit(static_cast<unsigned char>(token[digit_count])) != 0) {
+    ++digit_count;
+  }
+  if (digit_count == 0 || digit_count >= token.size()) {
+    return std::nullopt;
+  }
+  const auto position = parse_size(token.substr(0, digit_count));
+  const char base = static_cast<char>(std::toupper(static_cast<unsigned char>(token[digit_count])));
+  if (!position || *position == 0 || !is_base(base)) {
+    return std::nullopt;
+  }
+  const auto suffix = token.substr(digit_count + 1U);
+  if (!suffix.empty() && suffix != "!") {
+    return std::nullopt;
+  }
+  return std::pair{*position, base};
+}
+
+[[nodiscard]] std::vector<HaplogroupDefinition> load_haplogroups() {
+  std::ifstream input(phylotree_path());
+  if (!input) {
+    throw AnalysisError(AnalysisErrorCode::resource_open_failed,
+                        "could not open PhyloTree resource: " + phylotree_path());
+  }
+  std::vector<HaplogroupDefinition> definitions;
+  std::vector<HaplogroupDefinition> stack;
+  std::string line;
+  while (std::getline(input, line)) {
+    const auto opening = line.find("<haplogroup name=\"");
+    if (opening != std::string::npos) {
+      const auto name_start = opening + std::string_view("<haplogroup name=\"").size();
+      const auto name_end = line.find('"', name_start);
+      if (name_end == std::string::npos) {
+        throw AnalysisError(AnalysisErrorCode::resource_invalid,
+                            "malformed haplogroup name in PhyloTree resource");
+      }
+      HaplogroupDefinition node;
+      node.name = line.substr(name_start, name_end - name_start);
+      if (!stack.empty()) {
+        node.mutations = stack.back().mutations;
+      }
+      stack.push_back(std::move(node));
+    }
+
+    const auto poly_start = line.find("<poly>");
+    if (poly_start != std::string::npos && !stack.empty()) {
+      const auto value_start = poly_start + std::string_view("<poly>").size();
+      const auto value_end = line.find("</poly>", value_start);
+      if (value_end != std::string::npos) {
+        const auto mutation = trim_copy(std::string_view(line).substr(value_start, value_end - value_start));
+        if (const auto snv = phylo_snv(mutation)) {
+          auto mutation_it = std::lower_bound(
+              stack.back().mutations.begin(), stack.back().mutations.end(), snv->first,
+              [](const auto& item, std::size_t position) { return item.first < position; });
+          if (mutation.ends_with('!')) {
+            if (mutation_it != stack.back().mutations.end() && mutation_it->first == snv->first) {
+              stack.back().mutations.erase(mutation_it);
+            }
+          } else {
+            const auto encoded = std::to_string(snv->first) + std::string(1, snv->second);
+            if (mutation_it != stack.back().mutations.end() && mutation_it->first == snv->first) {
+              mutation_it->second = encoded;
+            } else {
+              stack.back().mutations.insert(mutation_it, {snv->first, encoded});
+            }
+          }
+        }
+      }
+    }
+
+    if (line.find("</haplogroup>") != std::string::npos) {
+      if (stack.empty()) {
+        throw AnalysisError(AnalysisErrorCode::resource_invalid,
+                            "unbalanced PhyloTree haplogroup closing tag");
+      }
+      definitions.push_back(stack.back());
+      stack.pop_back();
+    }
+  }
+  if (!stack.empty() || definitions.size() < 5000U) {
+    throw AnalysisError(AnalysisErrorCode::resource_invalid,
+                        "PhyloTree resource is incomplete or unbalanced");
+  }
+  return definitions;
+}
+
+[[nodiscard]] std::unordered_map<std::string, double> load_phylo_weights() {
+  std::ifstream input(phylotree_weights_path());
+  if (!input) {
+    throw AnalysisError(AnalysisErrorCode::resource_open_failed,
+                        "could not open PhyloTree weights: " + phylotree_weights_path());
+  }
+  std::unordered_map<std::string, double> weights;
+  std::string line;
+  while (std::getline(input, line)) {
+    const auto fields = split_tab(line);
+    if (fields.size() < 2) {
+      continue;
+    }
+    try {
+      const double weight = std::stod(fields[1]);
+      if (std::isfinite(weight) && weight > 0.0) {
+        weights[fields[0]] = weight;
+      }
+    } catch (const std::exception&) {
+      // Ignore a malformed optional weight and use the deterministic default.
+    }
+  }
+  return weights;
+}
+
+[[nodiscard]] double mutation_weight(const std::unordered_map<std::string, double>& weights,
+                                     const std::string& mutation) {
+  const auto it = weights.find(mutation);
+  return it == weights.end() ? 1.0 : it->second;
+}
+
+[[nodiscard]] std::string macro_haplogroup(std::string_view name) {
+  if (name.empty()) {
+    return {};
+  }
+  std::string macro(1, name.front());
+  if (name.front() == 'L' && name.size() > 1 &&
+      std::isdigit(static_cast<unsigned char>(name[1])) != 0) {
+    macro.push_back(name[1]);
+  }
+  return macro;
+}
+
+[[nodiscard]] std::map<int, ClusterHaplogroupAssignment> assign_haplogroups(
+    const std::vector<ReadFeature>& features,
+    const std::vector<HaplogroupDefinition>& definitions,
+    const std::unordered_map<std::string, double>& weights,
+    const AnalysisConfig& config) {
+  std::map<int, std::vector<const ReadFeature*>> clusters;
+  for (const auto& feature : features) {
+    if (!feature.filtered_numt) {
+      clusters[feature.cluster_id].push_back(&feature);
+    }
+  }
+  std::map<int, ClusterHaplogroupAssignment> assignments;
+  std::unordered_map<std::string, std::vector<std::size_t>> definitions_by_mutation;
+  definitions_by_mutation.reserve(definitions.size());
+  for (std::size_t definition_index = 0; definition_index < definitions.size();
+       ++definition_index) {
+    for (const auto& [_, mutation] : definitions[definition_index].mutations) {
+      definitions_by_mutation[mutation].push_back(definition_index);
+    }
+  }
+  std::vector<std::size_t> candidate_marks(definitions.size(), 0U);
+  std::size_t candidate_epoch = 0;
+  std::map<std::vector<std::pair<std::size_t, std::string>>, ClusterHaplogroupAssignment>
+      assignment_cache;
+  for (const auto& [cluster_id, members] : clusters) {
+    throw_if_cancelled(config);
+    std::map<std::string, std::size_t> observed_counts;
+    for (const auto* member : members) {
+      std::unordered_set<std::string> molecule_mutations;
+      for (const auto& snp : member->snps) {
+        molecule_mutations.insert(std::to_string(snp.position) +
+                                  std::string(1, snp.alternate));
+      }
+      for (const auto& mutation : molecule_mutations) {
+        ++observed_counts[mutation];
+      }
+    }
+    std::map<std::size_t, std::string> observed;
+    for (const auto& [mutation, count] : observed_counts) {
+      if (count * 2U < members.size()) {
+        continue;
+      }
+      if (const auto parsed = phylo_snv(mutation)) {
+        observed[parsed->first] = mutation;
+      }
+    }
+    const std::vector<std::pair<std::size_t, std::string>> observed_signature(observed.begin(),
+                                                                              observed.end());
+    if (const auto cached = assignment_cache.find(observed_signature);
+        cached != assignment_cache.end()) {
+      assignments.emplace(cluster_id, cached->second);
+      continue;
+    }
+
+    struct RankedDefinition {
+      const HaplogroupDefinition* definition = nullptr;
+      double score = 0.0;
+      std::size_t matched_count = 0;
+    };
+    double observed_weight = 0.0;
+    for (const auto& [_, mutation] : observed) {
+      observed_weight += mutation_weight(weights, mutation);
+    }
+    std::vector<RankedDefinition> ranked;
+    std::vector<std::size_t> candidate_indices;
+    if (candidate_epoch == std::numeric_limits<std::size_t>::max()) {
+      std::fill(candidate_marks.begin(), candidate_marks.end(), 0U);
+      candidate_epoch = 0;
+    }
+    ++candidate_epoch;
+    for (const auto& [_, mutation] : observed) {
+      const auto posting = definitions_by_mutation.find(mutation);
+      if (posting == definitions_by_mutation.end()) {
+        continue;
+      }
+      for (const auto definition_index : posting->second) {
+        if (candidate_marks[definition_index] != candidate_epoch) {
+          candidate_marks[definition_index] = candidate_epoch;
+          candidate_indices.push_back(definition_index);
+        }
+      }
+    }
+    std::sort(candidate_indices.begin(), candidate_indices.end());
+    ranked.reserve(candidate_indices.size());
+    for (const auto definition_index : candidate_indices) {
+      const auto& definition = definitions[definition_index];
+      const double expected_weight = definition.expected_weight;
+      double matched_weight = 0.0;
+      std::size_t matched_count = 0;
+      for (const auto& [position, mutation] : definition.mutations) {
+        const auto observed_it = observed.find(position);
+        if (observed_it != observed.end() && observed_it->second == mutation) {
+          matched_weight += mutation_weight(weights, mutation);
+          ++matched_count;
+        }
+      }
+      double score = 0.0;
+      if (expected_weight == 0.0 && observed_weight == 0.0) {
+        score = 100.0;
+      } else if (expected_weight > 0.0 && observed_weight > 0.0) {
+        score = 50.0 * ((matched_weight / expected_weight) +
+                        (matched_weight / observed_weight));
+      }
+      if (matched_count > 0 && score > 0.0) {
+        ranked.push_back({&definition, score, matched_count});
+      }
+    }
+    std::sort(ranked.begin(), ranked.end(), [](const auto& lhs, const auto& rhs) {
+      if (std::abs(lhs.score - rhs.score) > 1e-9) {
+        return lhs.score > rhs.score;
+      }
+      if (lhs.matched_count != rhs.matched_count) {
+        return lhs.matched_count > rhs.matched_count;
+      }
+      if (lhs.definition->mutations.size() != rhs.definition->mutations.size()) {
+        return lhs.definition->mutations.size() < rhs.definition->mutations.size();
+      }
+      return lhs.definition->name < rhs.definition->name;
+    });
+    ClusterHaplogroupAssignment assignment;
+    const auto keep = std::min<std::size_t>(3, ranked.size());
+    for (std::size_t i = 0; i < keep; ++i) {
+      HaplogroupCandidate candidate;
+      candidate.name = ranked[i].definition->name;
+      candidate.score = ranked[i].score;
+      for (const auto& [position, mutation] : ranked[i].definition->mutations) {
+        const auto observed_it = observed.find(position);
+        if (observed_it != observed.end() && observed_it->second == mutation) {
+          candidate.matched.push_back(mutation);
+        } else {
+          candidate.missing.push_back(mutation);
+        }
+      }
+      for (const auto& [position, mutation] : observed) {
+        const auto& expected_mutations = ranked[i].definition->mutations;
+        const auto expected = std::lower_bound(
+            expected_mutations.begin(), expected_mutations.end(), position,
+            [](const auto& item, std::size_t value) { return item.first < value; });
+        if (expected == expected_mutations.end() || expected->first != position ||
+            expected->second != mutation) {
+          candidate.extra.push_back(mutation);
+        }
+      }
+      assignment.candidates.push_back(std::move(candidate));
+    }
+    if (!assignment.candidates.empty()) {
+      assignment.best = assignment.candidates.front().name;
+      assignment.quality = assignment.candidates.front().score;
+    }
+    if (assignment.candidates.size() > 1 && assignment.candidates[1].score > 0.0 &&
+        assignment.candidates.front().score - assignment.candidates[1].score < 3.0 &&
+        macro_haplogroup(assignment.candidates.front().name) !=
+            macro_haplogroup(assignment.candidates[1].name)) {
+      assignment.contamination_warning = true;
+    }
+    assignment_cache.emplace(observed_signature, assignment);
+    assignments.emplace(cluster_id, std::move(assignment));
+  }
+  return assignments;
+}
+
 [[nodiscard]] std::string render_json(const std::string& input_path,
                                       const std::string& reference_path,
                                       const AnalysisConfig& config,
                                       std::string_view clustering_backend,
+                                      bool alignment_input,
+                                      bool has_nuclear_contigs,
+                                      std::size_t input_record_count,
                                       const std::string& reference,
                                       const std::vector<ReadRecord>& reads,
                                       const std::vector<ReadFeature>& features,
                                       const std::map<std::string, SvCall>& svs,
-                                      const CoverageResult& coverage_result) {
+                                      const CoverageResult& coverage_result,
+                                      const std::map<std::string, SnpAggregate>& variants,
+                                      const std::map<int, ClusterHaplogroupAssignment>& haplogroups,
+                                      const std::vector<ResourceRecord>& resources) {
   const auto& coverage = coverage_result.bins;
   std::map<int, std::vector<const ReadFeature*>> clusters;
   for (const auto& feature : features) {
@@ -1645,10 +2766,11 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
   }
 
   std::ostringstream out;
-  out << std::fixed << std::setprecision(3);
+  out << std::fixed << std::setprecision(6);
   out << "{";
   out << "\"metadata\":{";
   out << "\"schema_version\":" << quoted(kResultSchemaVersion) << ",";
+  out << "\"sv_event_schema_version\":" << quoted(kSvEventSchemaVersion) << ",";
   out << "\"engine_version\":" << quoted(kEngineVersion) << ",";
   out << "\"sample\":" << quoted(config.sample_name.empty()
                                       ? std::filesystem::path(input_path).stem().string()
@@ -1662,10 +2784,35 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
   out << "\"reference_length\":" << reference.size() << ",";
   out << "\"threads\":" << effective_thread_count(config.threads, reads.size()) << ",";
   out << "\"requested_threads\":" << std::max<std::size_t>(1, config.threads) << ",";
+  out << "\"calling_parameters\":{";
+  out << "\"min_mapping_quality\":" << static_cast<unsigned int>(config.min_mapping_quality) << ",";
+  out << "\"min_base_quality\":" << static_cast<unsigned int>(config.min_base_quality) << ",";
+  out << "\"excluded_snp_flags\":" << config.excluded_snp_flags << ",";
+  out << "\"numt_threshold\":" << config.numt_threshold << ",";
+  out << "\"development_tags_enabled\":"
+      << (config.allow_development_tags ? "true" : "false") << "},";
+  out << "\"resources\":[";
+  for (std::size_t i = 0; i < resources.size(); ++i) {
+    if (i != 0) {
+      out << ",";
+    }
+    const auto& resource = resources[i];
+    out << "{\"name\":" << quoted(resource.name) << ","
+        << "\"version\":" << quoted(resource.version) << ","
+        << "\"path\":" << quoted(resource.path) << ","
+        << "\"sha256\":" << quoted(resource.sha256) << ","
+        << "\"source\":" << quoted(resource.source) << ","
+        << "\"license\":" << quoted(resource.license) << ","
+        << "\"retrieved\":" << quoted(resource.retrieved) << "}";
+  }
+  out << "],";
   out << "\"algorithm_notes\":["
       << quoted("FASTQ/SAM parser with optional htslib BAM/CRAM reader") << ","
       << quoted("Aligned reads use CIGAR-aware reference comparison for SNP extraction") << ","
-      << quoted("NUMT score is heuristic until htslib nuclear remapping is enabled") << ","
+      << quoted("NUMT specificity requires competitive nuclear-plus-mitochondrial alignment") << ","
+      << quoted("Haplogroups use weighted PhyloTree 17.3 lineage matching") << ","
+      << quoted("SV event IDs use canonical mtDNA adjacency schema 1.0") << ","
+      << quoted("Split and supplementary alignments are reconstructed as molecule event edges") << ","
       << quoted(clustering_backend)
       << "]";
   out << "},";
@@ -1676,9 +2823,16 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
         return feature.filtered_numt;
       }));
   out << "\"input_reads\":" << reads.size() << ",";
+  out << "\"input_alignment_records\":" << input_record_count << ",";
+  out << "\"input_molecules\":" << reads.size() << ",";
   out << "\"passed_reads\":" << (features.size() - filtered) << ",";
   out << "\"numt_filtered_reads\":" << filtered << ",";
-  out << "\"numt_threshold\":0.300";
+  out << "\"numt_threshold\":" << config.numt_threshold << ",";
+  out << "\"numt_assessment\":{"
+      << "\"mode\":" << quoted(has_nuclear_contigs ? "competitive_alignment" :
+                                                      (alignment_input ? "mt_only_or_unknown" : "unaligned_fastq"))
+      << ",\"nuclear_contigs_present\":" << (has_nuclear_contigs ? "true" : "false")
+      << ",\"specificity_assessable\":" << (has_nuclear_contigs ? "true" : "false") << "}";
   out << "},";
 
   out << "\"genes\":[";
@@ -1720,7 +2874,9 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
   for (std::size_t i = 0; i < reads.size(); ++i) {
     if (i < features.size() && !features[i].filtered_numt && (reads[i].flags & 0x4U) == 0U &&
         !reads[i].reference_name.empty() && reads[i].reference_name != "*") {
-      ++mapq_histogram[reads[i].mapping_quality];
+      if (!looks_like_nuclear_contig(reads[i].reference_name)) {
+        ++mapq_histogram[reads[i].mapping_quality];
+      }
     }
   }
   out << "\"coverage_metrics\":{";
@@ -1754,6 +2910,19 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
         << "\"end\":" << sv.end << ","
         << "\"length\":" << sv.length << ","
         << "\"known_event\":" << (sv.known_event ? "true" : "false") << ","
+        << "\"evidence_source\":"
+        << quoted(sv.evidence_sources.size() == 1U ? sv.evidence_sources.front() : "combined")
+        << ",\"evidence_sources\":";
+    write_string_array(out, sv.evidence_sources);
+    out << ",\"segment_count\":" << sv.segment_count << ",";
+    if (!sv.orientations.empty()) {
+      out << "\"orientation\":"
+          << quoted(sv.orientations.size() == 1U ? sv.orientations.front() : "mixed")
+          << ",\"orientations\":";
+      write_string_array(out, sv.orientations);
+      out << ",";
+    }
+    out
         << "\"supporting_reads\":[";
     for (std::size_t i = 0; i < sv.supporting_reads.size(); ++i) {
       if (i != 0) {
@@ -1762,6 +2931,95 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
       out << quoted(sv.supporting_reads[i]);
     }
     out << "]}";
+  }
+  out << "],";
+
+  out << "\"variants\":[";
+  std::size_t variant_index = 0;
+  for (const auto& [_, aggregate] : variants) {
+    if (variant_index++ != 0) {
+      out << ",";
+    }
+    const auto& snp = aggregate.call;
+    out << "{"
+        << "\"position\":" << snp.position << ","
+        << "\"ref\":" << quoted(std::string(1, snp.reference)) << ","
+        << "\"alt\":" << quoted(std::string(1, snp.alternate)) << ","
+        << "\"alt_depth\":" << aggregate.alternate_depth << ","
+        << "\"ref_depth\":" << aggregate.reference_depth << ","
+        << "\"other_depth\":" << aggregate.other_depth << ","
+        << "\"callable_depth\":" << aggregate.callable_depth << ","
+        << "\"heteroplasmy\":" << aggregate.heteroplasmy << ","
+        << "\"ci95_low\":" << aggregate.ci95_low << ","
+        << "\"ci95_high\":" << aggregate.ci95_high << ","
+        << "\"supporting_reads\":";
+    write_string_array(out, aggregate.supporting_reads);
+    if (!snp.gene.empty()) {
+      out << ",\"gene\":" << quoted(snp.gene);
+    }
+    if (!snp.consequence.empty()) {
+      out << ",\"consequence\":" << quoted(snp.consequence);
+    }
+    if (!snp.protein.empty()) {
+      out << ",\"protein\":" << quoted(snp.protein);
+    }
+    if (!snp.residue.empty()) {
+      out << ",\"residue\":" << quoted(snp.residue);
+    }
+    if (!snp.phenotype.empty() || !snp.pathogenicity.empty() || !snp.references.empty() ||
+        !snp.sources.empty() || !snp.clinvar_allele_id.empty() || !snp.mitomap_url.empty()) {
+      out << ",\"annotation\":{";
+      bool field = false;
+      const auto comma = [&]() {
+        if (field) {
+          out << ",";
+        }
+        field = true;
+      };
+      if (!snp.phenotype.empty()) {
+        comma();
+        out << "\"phenotype\":" << quoted(snp.phenotype);
+      }
+      if (!snp.pathogenicity.empty()) {
+        comma();
+        out << "\"pathogenicity\":" << quoted(snp.pathogenicity);
+      }
+      if (!snp.references.empty()) {
+        comma();
+        out << "\"references\":";
+        write_string_array(out, snp.references);
+      }
+      if (!snp.sources.empty()) {
+        comma();
+        out << "\"sources\":";
+        write_string_array(out, snp.sources);
+        out << ",\"source\":" << quoted("local-cache");
+      }
+      if (!snp.clinvar_allele_id.empty()) {
+        comma();
+        out << "\"clinvar_allele_id\":" << quoted(snp.clinvar_allele_id);
+      }
+      if (!snp.mitomap_url.empty()) {
+        comma();
+        out << "\"mitomap_url\":" << quoted(snp.mitomap_url);
+      }
+      out << "}";
+    }
+    if (!snp.structure_id.empty()) {
+      out << ",\"structure\":{"
+          << "\"structure_id\":" << quoted(snp.structure_id);
+      if (!snp.structure_chain.empty()) {
+        out << ",\"chain\":" << quoted(snp.structure_chain);
+      }
+      if (snp.structure_residue != 0) {
+        out << ",\"residue_index\":" << snp.structure_residue;
+      }
+      if (!snp.structure_complex.empty()) {
+        out << ",\"complex\":" << quoted(snp.structure_complex);
+      }
+      out << "}";
+    }
+    out << "}";
   }
   out << "],";
 
@@ -1779,11 +3037,38 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
         ++sv_counts[sv_id];
       }
     }
+    const auto assignment_it = haplogroups.find(cluster_id);
+    const ClusterHaplogroupAssignment* assignment =
+        assignment_it == haplogroups.end() ? nullptr : &assignment_it->second;
     out << "{"
         << "\"id\":" << cluster_id << ","
         << "\"label\":"
-        << quoted(cluster_id < 0 ? "Outliers" : "H" + std::to_string(cluster_id + 1)) << ","
-        << "\"haplogroup\":" << quoted("unassigned") << ","
+        << quoted(cluster_id < 0 ? "Outliers" : "Cluster " + std::to_string(cluster_id + 1)) << ","
+        << "\"haplogroup\":" << quoted(assignment == nullptr ? "unassigned" : assignment->best) << ","
+        << "\"haplogroup_assignment\":{";
+    out << "\"resource\":" << quoted("phylotree-rcrs@17.3") << ","
+        << "\"quality\":" << (assignment == nullptr ? 0.0 : assignment->quality) << ","
+        << "\"contamination_warning\":"
+        << (assignment != nullptr && assignment->contamination_warning ? "true" : "false") << ","
+        << "\"candidates\":[";
+    if (assignment != nullptr) {
+      for (std::size_t candidate_index = 0; candidate_index < assignment->candidates.size();
+           ++candidate_index) {
+        if (candidate_index != 0) {
+          out << ",";
+        }
+        const auto& candidate = assignment->candidates[candidate_index];
+        out << "{\"name\":" << quoted(candidate.name) << ",\"score\":" << candidate.score
+            << ",\"matched\":";
+        write_string_array(out, candidate.matched);
+        out << ",\"missing\":";
+        write_string_array(out, candidate.missing);
+        out << ",\"extra\":";
+        write_string_array(out, candidate.extra);
+        out << "}";
+      }
+    }
+    out << "]},"
         << "\"size\":" << members.size() << ","
         << "\"outlier\":" << (cluster_id < 0 ? "true" : "false") << ","
         << "\"consensus_haplotype\":"
@@ -1822,6 +3107,9 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
         << "\"mean_quality\":" << feature.mean_quality << ","
         << "\"numt_score\":" << feature.numt_score << ","
         << "\"filtered_numt\":" << (feature.filtered_numt ? "true" : "false") << ","
+        << "\"numt_evidence\":";
+    write_string_array(out, feature.numt_evidence);
+    out << ","
         << "\"cluster_id\":" << feature.cluster_id << ","
         << "\"outlier\":" << (feature.outlier ? "true" : "false") << ","
         << "\"mapping_quality\":" << static_cast<int>(feature.mapping_quality) << ","
@@ -1858,7 +3146,7 @@ void add_circular_coverage_span(std::vector<std::int64_t>& difference,
         out << ",\"residue\":" << quoted(snp.residue);
       }
       if (!snp.phenotype.empty() || !snp.pathogenicity.empty() || !snp.references.empty() ||
-          !snp.sources.empty()) {
+          !snp.sources.empty() || !snp.clinvar_allele_id.empty() || !snp.mitomap_url.empty()) {
         out << ",\"annotation\":{";
         bool annotation_field = false;
         const auto comma = [&]() {
@@ -1938,15 +3226,31 @@ std::string AnalysisEngine::analyze(const std::string& input_path,
   throw_if_cancelled(config);
   const auto reference = load_reference(reference_path);
   throw_if_cancelled(config);
-  const auto reads = read_input(input_path, config);
-  if (reads.empty()) {
-    throw std::runtime_error("input contains no read records: " + input_path);
+  auto input = read_input(input_path, config);
+  if (input.reads.empty()) {
+    throw AnalysisError(AnalysisErrorCode::input_empty,
+                        "input contains no read records: " + input_path);
   }
+  const bool alignment_input = input.alignment_input;
+  const bool has_nuclear_contigs = input.has_nuclear_contigs;
+  const std::size_t input_record_count = input.reads.size();
+  const auto reads = collapse_molecule_alignments(input);
   throw_if_cancelled(config);
   std::vector<ReadFeature> features;
   features.reserve(reads.size());
   std::map<std::string, SvCall> svs;
-  const auto clinical_annotations = load_clinical_annotations();
+  static const auto clinical_annotations = load_clinical_annotations();
+  static const auto resources = load_resource_manifest();
+  static const auto haplogroup_weights = load_phylo_weights();
+  static const auto haplogroup_definitions = [&] {
+    auto definitions = load_haplogroups();
+    for (auto& definition : definitions) {
+      for (const auto& [_, mutation] : definition.mutations) {
+        definition.expected_weight += mutation_weight(haplogroup_weights, mutation);
+      }
+    }
+    return definitions;
+  }();
   auto extraction_results = extract_features_parallel(reads, reference, config, clinical_annotations);
 
   for (auto& result : extraction_results) {
@@ -1971,8 +3275,12 @@ std::string AnalysisEngine::analyze(const std::string& input_path,
 
   throw_if_cancelled(config);
   const auto coverage = compute_coverage(reads, features, config, reference.size());
-  return render_json(input_path, reference_path, config, clustering_backend, reference, reads, features,
-                     svs, coverage);
+  const auto variants = aggregate_snps(reads, features, config, reference.size());
+  const auto haplogroups =
+      assign_haplogroups(features, haplogroup_definitions, haplogroup_weights, config);
+  return render_json(input_path, reference_path, config, clustering_backend, alignment_input,
+                     has_nuclear_contigs, input_record_count, reference, reads, features, svs, coverage, variants,
+                     haplogroups, resources);
 }
 
 } // namespace mito

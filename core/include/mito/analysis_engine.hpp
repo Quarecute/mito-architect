@@ -1,10 +1,50 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
+#include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
 
 namespace mito {
+
+/** Stable failure categories exposed across the C and Rust boundaries. */
+enum class AnalysisErrorCode : std::uint8_t {
+  invalid_configuration,
+  input_open_failed,
+  input_format_unsupported,
+  input_parse_failed,
+  input_empty,
+  reference_open_failed,
+  reference_invalid,
+  resource_open_failed,
+  resource_invalid,
+  dependency_unavailable,
+  analysis_cancelled,
+  resource_exhausted,
+  internal_error,
+};
+
+/**
+ * Versioned, machine-readable analysis failure.
+ *
+ * Messages are diagnostic and may become more specific. Callers must branch on
+ * code(), whose string representation is stable within error schema 1.0.
+ */
+class AnalysisError final : public std::runtime_error {
+public:
+  AnalysisError(AnalysisErrorCode code, std::string message)
+      : std::runtime_error(std::move(message)), code_(code) {}
+
+  [[nodiscard]] AnalysisErrorCode code() const noexcept { return code_; }
+
+private:
+  AnalysisErrorCode code_;
+};
+
+[[nodiscard]] std::string_view analysis_error_code_name(AnalysisErrorCode code) noexcept;
 
 /**
  * Runtime configuration for one mitochondrial analysis job.
@@ -14,8 +54,14 @@ namespace mito {
  * The bundled rCRS reference is used when no explicit reference is supplied.
  */
 struct AnalysisConfig {
-  /** Discard reads whose NUMT heuristic score exceeds the configured threshold. */
+  /** Discard molecules whose NUMT evidence score exceeds numt_threshold. */
   bool filter_numt = true;
+
+  /** NUMT evidence threshold in [0, 1]. Competitive nuclear evidence scores >= 0.90. */
+  double numt_threshold = 0.30;
+
+  /** Enable synthetic snp=/sv= read-name controls. Must remain false for real analysis. */
+  bool allow_development_tags = false;
 
   /** Worker count requested by the caller; the core clamps this to at least one. */
   std::size_t threads = 1;
@@ -29,10 +75,19 @@ struct AnalysisConfig {
   /** Minimum neighboring reads required to start a non-outlier cluster. */
   std::size_t min_cluster_size = 1;
 
+  /** Minimum alignment MAPQ for SNP calling and locus-callable allele depth. */
+  std::uint8_t min_mapping_quality = 20;
+
+  /** Minimum Phred base quality for SNP calling and locus-callable allele depth. */
+  std::uint8_t min_base_quality = 10;
+
+  /** SAM flags excluded from SNP evidence: secondary, QC-fail, duplicate, supplementary. */
+  std::uint16_t excluded_snp_flags = 0xF00;
+
   /** Optional sample label to put into result metadata. Defaults to input stem. */
   std::string sample_name;
 
-  /** Reserved path for future nuclear remapping against hg38 or another reference. */
+  /** Optional versioned nuclear reference identity supplied by an external mapping stage. */
   std::string nuclear_reference_path;
 
   /**

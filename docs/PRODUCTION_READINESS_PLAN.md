@@ -6,7 +6,8 @@ coverage.
 
 ## Gate 1: Reproducible Validation Fixtures
 
-Status: complete for the current offline fixture suite.
+Status: partial. Offline development fixtures exist; representative calibrated
+materials and the matrix in `PRODUCTION_ACCEPTANCE.md` are still required.
 
 Acceptance criteria:
 
@@ -39,8 +40,9 @@ Acceptance criteria:
 
 ## Gate 4: VCF And Heteroplasmy Export
 
-Status: partial. SNP support export is deterministic, but DP/HF currently use
-passed-read count rather than locus-specific callable depth.
+Status: implementation complete, analytical validation pending. SNP aggregates
+and VCF now use quality-filtered locus-callable A/C/G/T molecule depth and emit
+Wilson 95% heteroplasmy intervals.
 
 Acceptance criteria:
 
@@ -62,8 +64,8 @@ Acceptance criteria:
 
 ## Gate 6: Operational Packaging
 
-Status: code-complete; local Docker execution is blocked until the current user
-can access `/var/run/docker.sock`.
+Status: partial. Container and bounded local execution exist, but durable job
+state, authentication, audit logging, observability, and recovery testing do not.
 
 Acceptance criteria:
 
@@ -76,10 +78,40 @@ Acceptance criteria:
 
 ## Gate 7: Production Boundary Statement
 
-Status: complete for 0.2.0.
+Status: complete for the 0.4.1 research-use boundary statement.
 
 Acceptance criteria:
 
 - README and user guide describe exactly which outputs are validated.
 - Known limitations are framed as internal roadmap items, not comparisons.
 - Release notes summarize behavior changes and migration risks.
+
+## Gate 8: Structure Viewer Provenance
+
+Status: complete for currently mapped MT-ATP6 and MT-ND4 variants. Both use
+human experimental cryo-EM entries with verified chain ranges, bundled
+checksum-verified coordinates, and two RCSB network formats. Only curated PDB
+identifiers are accepted.
+
+Acceptance criteria:
+
+- Coordinate models are resolved from a named public structure source.
+- Viewer interactions do not trigger repeated coordinate downloads.
+- The UI exposes model provenance, residue selection, local atomic context, and
+  confidence coloring.
+- Offline or failed model retrieval is explicit; synthetic coordinates are not
+  presented as biological structure.
+
+## Gate 9: Biological Benchmark Cohort
+
+Status: partial. A reproducible bounded public ONT acquisition path and offline
+truth fixtures exist; calibrated low-frequency and rearrangement reference
+materials are still required.
+
+Acceptance criteria:
+
+- Public accessions, reference sequence, checksums, and tool versions are
+  captured for every downloaded validation bundle.
+- CI remains independent of network and large human datasets.
+- Sensitivity, precision, heteroplasmy error, breakpoint tolerance, and NUMT
+  leakage are measured against molecule-level truth across relevant depths.

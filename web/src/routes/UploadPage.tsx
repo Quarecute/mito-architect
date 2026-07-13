@@ -65,7 +65,7 @@ export default function UploadPage() {
       <ProgressBar
         status={status.data?.status ?? (upload.isError ? 'error' : upload.isPending ? 'queued' : 'processing')}
         progress={status.data?.progress ?? (upload.isPending ? 5 : 0)}
-        error={(upload.error as Error | undefined)?.message ?? status.data?.error}
+        error={(upload.error as Error | undefined)?.message ?? status.data?.error?.message}
       />
     </main>
   );
