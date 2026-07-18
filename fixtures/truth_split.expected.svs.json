@@ -79,5 +79,6 @@
       "orientations": ["+/-"],
       "supporting_reads": ["split-inversion"]
     }
-  ]
+  ],
+  "complex_events": []
 }

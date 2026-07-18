@@ -1,7 +1,8 @@
 name	version	path	sha256	source	license	retrieved
 rCRS	NC_012920.1	rcrs.fasta	fc392cde8e63b4d2e3a870bb97cc0626dea33d46dfb8abdebffada040f42ec92	https://www.ncbi.nlm.nih.gov/nuccore/NC_012920.1	NCBI data terms	bundled
-clinical-curated	2026-07-12	clinical_annotations.tsv	50adcc62a6c67c37d2b48cc2fbeb00888f65ff6230e1170165addd3a4e3ec2f1	MITOMAP and ClinVar identifiers; manually curated subset	source-specific terms	2026-07-12
+clinical-curated	curated-subset-2026-07-16	clinical_annotations.tsv	ec4253dc4e4bafe6847e5cd4afb9f1576362595f7f804e04ed21964539b5eb2d	MITOMAP and ClinVar identifiers; manually curated assertion-level subset	source-specific terms	2026-07-16
 phylotree-rcrs	17.3	phylotree-rcrs-17.3.xml	5490d3756503654001d07ed3a733bcfa8ee9ee225c50cd07c8c4260d239d85b1	https://github.com/genepi/phylotree-rcrs-17/releases/tag/17.3	MIT	2026-07-12
 phylotree-weights	17.3	phylotree-rcrs-17.3-weights.txt	d0962699365c7fe6f0b41f7c1793513fa950597c971c859beeb7dc0e3f8ab92a	https://github.com/genepi/phylotree-rcrs-17/releases/tag/17.3	MIT	2026-07-12
+phylotree-alignment-rules	17.3	phylotree-rcrs-17.3-rules.csv	0a4834cdbc780b810e406b570a88597868d60e854bd38146930455518f35d43b	https://github.com/genepi/haplogrep3/releases/tag/v3.3.2	MIT	2026-07-16
 RCSB-PDB-8H9S	8H9S	web/public/structures/8h9s.bcif	23c20bfc370758641833af7befd303e3d059c647e246309ab879697898368b30	https://www.rcsb.org/structure/8H9S	RCSB PDB data usage policy	2026-07-12
 RCSB-PDB-9I4I	9I4I	web/public/structures/9i4i.bcif	4775116b7792bb84086f56267e112071a462c1015ba289ae5f20c9e559948a36	https://www.rcsb.org/structure/9I4I	RCSB PDB data usage policy	2026-07-12

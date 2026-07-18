@@ -1,6 +1,6 @@
 {
   "name": "@mito-architect/web",
-  "version": "0.4.1",
+  "version": "0.5.0-dev",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@mito-architect/visualization-lib": "0.4.1",
+    "@mito-architect/visualization-lib": "0.5.0-dev",
     "@tanstack/react-query": "^5.56.2",
     "lucide-react": "^0.468.0",
     "ngl": "^2.4.0",

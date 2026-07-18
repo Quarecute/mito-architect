@@ -6,7 +6,9 @@
 ##INFO=<ID=HF,Number=A,Type=Float,Description="Heteroplasmy fraction estimated from alternate depth / locus-callable depth">
 ##INFO=<ID=HF_CI95,Number=2,Type=Float,Description="Wilson 95% confidence interval for heteroplasmy fraction">
 ##INFO=<ID=GENE,Number=1,Type=String,Description="Annotated mitochondrial gene">
-##INFO=<ID=CLNSIG,Number=1,Type=String,Description="Clinical significance from local annotation cache">
+##INFO=<ID=CLNSIG,Number=1,Type=String,Description="Deterministic clinical significance summary; inspect source assertions before interpretation">
+##INFO=<ID=CLNCONFLICT,Number=0,Type=Flag,Description="Source assertions contain incompatible or explicitly conflicting significance groups">
+##INFO=<ID=CLNSRC,Number=.,Type=String,Description="Clinical assertion sources preserved in the JSON result">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype placeholder for haploid mtDNA export">
 ##FORMAT=<ID=HF,Number=1,Type=Float,Description="Heteroplasmy fraction">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	truth_mixed

@@ -1,5 +1,6 @@
 import type {
   ClusterSummary,
+  ComplexStructuralEvent,
   MitoAnalysisData,
   ReadFeature,
   StructuralVariant
@@ -29,6 +30,13 @@ interface SvSummary {
   readIds: string[];
 }
 
+interface ComplexEventSummary {
+  event: ComplexStructuralEvent;
+  support: number;
+  frequency: number;
+  readIds: string[];
+}
+
 export default function ClusterMutationPanel({ data }: ClusterMutationPanelProps) {
   const selectedCluster = useMitoStore((state) => state.selectedCluster);
   const selectedSvId = useMitoStore((state) => state.selectedSvId);
@@ -45,9 +53,10 @@ export default function ClusterMutationPanel({ data }: ClusterMutationPanelProps
       cluster,
       reads: selectedReads,
       mutations: summarizeSnps(selectedReads),
-      svs: summarizeSvs(selectedReads, data.svs)
+      svs: summarizeSvs(selectedReads, data.svs),
+      complexEvents: summarizeComplexEvents(selectedReads, data.complex_events ?? [])
     };
-  }, [data.reads, data.svs, data.clusters, selectedCluster]);
+  }, [data.reads, data.svs, data.complex_events, data.clusters, selectedCluster]);
 
   const label = selectedCluster === undefined ? 'All clusters' : summary.cluster?.label ?? `H${selectedCluster + 1}`;
   const denominator = Math.max(1, summary.reads.length);
@@ -119,6 +128,7 @@ export default function ClusterMutationPanel({ data }: ClusterMutationPanelProps
               <Metric label="Molecules" value={summary.reads.length.toString()} />
               <Metric label="SNP sites" value={summary.mutations.length.toString()} />
               <Metric label="SV calls" value={summary.svs.length.toString()} />
+              <Metric label="Complex paths" value={summary.complexEvents.length.toString()} />
               <Metric
                 label="Mean Q"
                 value={
@@ -165,6 +175,40 @@ export default function ClusterMutationPanel({ data }: ClusterMutationPanelProps
                       {item.support}/{denominator} molecules | {item.sv.length} bp
                     </div>
                   </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-md border border-line">
+            <div className="border-b border-line bg-panel2 px-3 py-2 text-xs font-semibold uppercase tracking-normal text-muted">
+              Multi-junction molecule paths
+            </div>
+            <div className="max-h-64 overflow-auto scrollbar-thin">
+              {summary.complexEvents.length === 0 ? (
+                <EmptyRow text="No molecule carries two or more rearrangement junctions" />
+              ) : (
+                summary.complexEvents.map((item) => (
+                  <details key={item.event.id} className="border-b px-3 py-2 text-sm last:border-0">
+                    <summary className="cursor-pointer select-none">
+                      <span className="font-semibold">
+                        {item.event.junction_count} junctions / {item.event.segment_count} segments
+                      </span>
+                      <span className="ml-2 text-magenta">
+                        {item.support}/{denominator} ({formatPercent(item.frequency)})
+                      </span>
+                    </summary>
+                    <ol className="mt-2 grid gap-1 pl-5 text-xs text-muted">
+                      {item.event.junction_ids.map((junctionId, index) => (
+                        <li key={`${item.event.id}:${index}`} className="font-mono">
+                          {junctionId} [{item.event.junction_orientations[index] ?? '?'}]
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="mt-2 truncate text-xs text-muted" title={item.readIds.join(', ')}>
+                      Molecules: {item.readIds.join(', ')}
+                    </div>
+                  </details>
                 ))
               )}
             </div>
@@ -343,6 +387,44 @@ function summarizeSvs(reads: ReadFeature[], svs: StructuralVariant[]): SvSummary
       };
     })
     .sort((a, b) => a.sv.start - b.sv.start || b.support - a.support);
+}
+
+function summarizeComplexEvents(
+  reads: ReadFeature[],
+  events: ComplexStructuralEvent[]
+): ComplexEventSummary[] {
+  const byId = new Map(events.map((event) => [event.id, event]));
+  const support = new Map<string, { count: number; readIds: string[] }>();
+  for (const read of reads) {
+    for (const eventId of read.complex_event_ids ?? []) {
+      const current = support.get(eventId) ?? { count: 0, readIds: [] };
+      current.count += 1;
+      current.readIds.push(read.id);
+      support.set(eventId, current);
+    }
+  }
+
+  return [...support.entries()]
+    .flatMap(([eventId, item]) => {
+      const event = byId.get(eventId);
+      if (!event) {
+        return [];
+      }
+      return [
+        {
+          event,
+          support: item.count,
+          frequency: reads.length === 0 ? 0 : item.count / reads.length,
+          readIds: item.readIds
+        }
+      ];
+    })
+    .sort(
+      (a, b) =>
+        b.support - a.support ||
+        b.event.junction_count - a.event.junction_count ||
+        a.event.id.localeCompare(b.event.id)
+    );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

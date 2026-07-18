@@ -1,0 +1,1553 @@
+{
+  "alignments": [
+    {
+      "flags": 0,
+      "id": "alignment:0",
+      "molecule_id": "phase-both",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 0
+    },
+    {
+      "flags": 0,
+      "id": "alignment:1",
+      "molecule_id": "phase-a-only",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 1
+    },
+    {
+      "flags": 0,
+      "id": "alignment:2",
+      "molecule_id": "reference",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 2
+    },
+    {
+      "flags": 0,
+      "id": "alignment:3",
+      "molecule_id": "insertion-phase",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 3
+    },
+    {
+      "flags": 0,
+      "id": "alignment:4",
+      "molecule_id": "insertion-other",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 4
+    },
+    {
+      "flags": 0,
+      "id": "alignment:5",
+      "molecule_id": "deletion-phase",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 5
+    },
+    {
+      "flags": 0,
+      "id": "alignment:6",
+      "molecule_id": "split-gap",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 6
+    },
+    {
+      "flags": 2048,
+      "id": "alignment:7",
+      "molecule_id": "split-gap",
+      "role": "supplementary",
+      "selected_representative": false,
+      "source_record_index": 7
+    }
+  ],
+  "architectures": [],
+  "callability": [
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:5",
+          "callable_bases": 11,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 4,
+              "start": 1
+            },
+            {
+              "end": 12,
+              "start": 6
+            }
+          ],
+          "reference_exclusion_counts": {
+            "DELETION_FROM_REFERENCE_PATH": 1
+          },
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 11,
+      "callable_fraction": 0.00066389,
+      "known": true,
+      "molecule_id": "deletion-phase",
+      "ranges": [
+        {
+          "end": 4,
+          "start": 1
+        },
+        {
+          "end": 12,
+          "start": 6
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:4",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [
+            5
+          ],
+          "eligible": true,
+          "inserted_query_bases": 1,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "insertion-other",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:3",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [
+            5
+          ],
+          "eligible": true,
+          "inserted_query_bases": 1,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "insertion-phase",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:1",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "phase-a-only",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:0",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "phase-both",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:2",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "reference",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:6",
+          "callable_bases": 5,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 5,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:7",
+          "callable_bases": 7,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 6
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "split-gap",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    }
+  ],
+  "events": [
+    {
+      "alt": "A",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 3,
+      "evidence_counts": {
+        "alternate": 6,
+        "callable": 7,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "id": "snv:3:T:A",
+      "index": 0,
+      "length": 1,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "ref": "T",
+      "source_projection": "variants",
+      "start": 3,
+      "supporting_molecule_ids": [
+        "deletion-phase",
+        "insertion-other",
+        "insertion-phase",
+        "phase-a-only",
+        "phase-both",
+        "split-gap"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "G",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 5,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 6,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 5
+      },
+      "id": "snv:5:A:G",
+      "index": 1,
+      "length": 1,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "ref": "A",
+      "source_projection": "variants",
+      "start": 5,
+      "supporting_molecule_ids": [
+        "phase-both"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "C",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 5,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 6,
+        "conflict": 0,
+        "event_absent": 5,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "indel:deletion:5-5:A",
+      "index": 2,
+      "length": 1,
+      "negative_evidence_rule": "same_fragment_callable_deleted_span_with_flanks",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "ref": "CA",
+      "source_projection": "small_indels",
+      "start": 5,
+      "supporting_molecule_ids": [
+        "deletion-phase"
+      ],
+      "type": "SMALL_DELETION"
+    },
+    {
+      "alt": "AG",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 5,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 5,
+        "conflict": 0,
+        "event_absent": 4,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "indel:insertion:5:G",
+      "index": 3,
+      "length": 1,
+      "negative_evidence_rule": "same_fragment_callable_reference_adjacency",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "ref": "A",
+      "source_projection": "small_indels",
+      "start": 5,
+      "supporting_molecule_ids": [
+        "insertion-phase"
+      ],
+      "type": "SMALL_INSERTION"
+    },
+    {
+      "alt": "AT",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 5,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 5,
+        "conflict": 0,
+        "event_absent": 4,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "indel:insertion:5:T",
+      "index": 4,
+      "length": 1,
+      "negative_evidence_rule": "same_fragment_callable_reference_adjacency",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "ref": "A",
+      "source_projection": "small_indels",
+      "start": 5,
+      "supporting_molecule_ids": [
+        "insertion-other"
+      ],
+      "type": "SMALL_INSERTION"
+    }
+  ],
+  "evidence_encoding": {
+    "layout": "paged_columnar_molecule_event",
+    "missing_pair_state": "NOT_CALLABLE",
+    "observation_count": 29,
+    "observation_limit": 5000000,
+    "observation_page_count": 10,
+    "observation_page_size": 3,
+    "observation_storage": "embedded_columnar_pages",
+    "phase_link_limit": 1000000,
+    "phase_molecule_policy": "evidence_eligible_only",
+    "phase_molecule_reference": "molecules[].index",
+    "phase_null_model": "independent_marginals_within_jointly_callable",
+    "scope": "snv_indel_sv_complex_evidence_rc2"
+  },
+  "input_alignment_records": 8,
+  "input_molecules": 7,
+  "molecules": [
+    {
+      "alignment_ids": [
+        "alignment:5"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A",
+        "indel:deletion:5-5:A"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 11,
+      "callable_fraction": 0.00066389,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 2,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "deletion-phase",
+      "identity_policy": "sam_qname",
+      "index": 0,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 11,
+      "representative_alignment_id": "alignment:5",
+      "source_qnames": [
+        "deletion-phase"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:4"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A",
+        "indel:insertion:5:T"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 2,
+        "conflict": 0,
+        "event_absent": 2,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "exclusion_reasons": [],
+      "id": "insertion-other",
+      "identity_policy": "sam_qname",
+      "index": 1,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 13,
+      "representative_alignment_id": "alignment:4",
+      "source_qnames": [
+        "insertion-other"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:3"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A",
+        "indel:insertion:5:G"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 2,
+        "conflict": 0,
+        "event_absent": 2,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "exclusion_reasons": [],
+      "id": "insertion-phase",
+      "identity_policy": "sam_qname",
+      "index": 2,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 13,
+      "representative_alignment_id": "alignment:3",
+      "source_qnames": [
+        "insertion-phase"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:1"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 1,
+        "conflict": 0,
+        "event_absent": 3,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "exclusion_reasons": [],
+      "id": "phase-a-only",
+      "identity_policy": "sam_qname",
+      "index": 3,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 12,
+      "representative_alignment_id": "alignment:1",
+      "source_qnames": [
+        "phase-a-only"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:0"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A",
+        "snv:5:A:G"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 2,
+        "conflict": 0,
+        "event_absent": 3,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "phase-both",
+      "identity_policy": "sam_qname",
+      "index": 4,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 12,
+      "representative_alignment_id": "alignment:0",
+      "source_qnames": [
+        "phase-both"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:2"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 1,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 3,
+        "low_quality": 0,
+        "reference": 2
+      },
+      "exclusion_reasons": [],
+      "id": "reference",
+      "identity_policy": "sam_qname",
+      "index": 5,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 12,
+      "representative_alignment_id": "alignment:2",
+      "source_qnames": [
+        "reference"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:6",
+        "alignment:7"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "exclusion_reasons": [],
+      "id": "split-gap",
+      "identity_policy": "sam_qname",
+      "index": 6,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY",
+        "SUPPLEMENTARY_EVIDENCE_PRESENT"
+      ],
+      "protocol_metadata": {},
+      "query_length": 5,
+      "representative_alignment_id": "alignment:6",
+      "source_qnames": [
+        "split-gap"
+      ],
+      "warnings": []
+    }
+  ],
+  "observations": [
+    {
+      "alignment_id": "alignment:5",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:0",
+      "mapping_quality": 60,
+      "molecule_id": "deletion-phase",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:4",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:1",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-other",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:4",
+      "base_quality": 40,
+      "event_id": "snv:5:A:G",
+      "evidence_source": "aligned_base",
+      "id": "observation:2",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-other",
+      "observed_allele": "A",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:3",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:3",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-phase",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:3",
+      "base_quality": 40,
+      "event_id": "snv:5:A:G",
+      "evidence_source": "aligned_base",
+      "id": "observation:4",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-phase",
+      "observed_allele": "A",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:5",
+      "mapping_quality": 60,
+      "molecule_id": "phase-a-only",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": 40,
+      "event_id": "snv:5:A:G",
+      "evidence_source": "aligned_base",
+      "id": "observation:6",
+      "mapping_quality": 60,
+      "molecule_id": "phase-a-only",
+      "observed_allele": "A",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:7",
+      "mapping_quality": 60,
+      "molecule_id": "phase-both",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": 40,
+      "event_id": "snv:5:A:G",
+      "evidence_source": "aligned_base",
+      "id": "observation:8",
+      "mapping_quality": 60,
+      "molecule_id": "phase-both",
+      "observed_allele": "G",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:9",
+      "mapping_quality": 60,
+      "molecule_id": "reference",
+      "observed_allele": "T",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": 40,
+      "event_id": "snv:5:A:G",
+      "evidence_source": "aligned_base",
+      "id": "observation:10",
+      "mapping_quality": 60,
+      "molecule_id": "reference",
+      "observed_allele": "A",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:6",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:11",
+      "mapping_quality": 60,
+      "molecule_id": "split-gap",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:6",
+      "base_quality": 40,
+      "event_id": "snv:5:A:G",
+      "evidence_source": "aligned_base",
+      "id": "observation:12",
+      "mapping_quality": 60,
+      "molecule_id": "split-gap",
+      "observed_allele": "A",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:5",
+      "base_quality": null,
+      "event_id": "indel:deletion:5-5:A",
+      "evidence_source": "cigar_small_indel",
+      "id": "observation:13",
+      "mapping_quality": 60,
+      "molecule_id": "deletion-phase",
+      "observed_allele": "C",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:4",
+      "base_quality": null,
+      "event_id": "indel:deletion:5-5:A",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:14",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-other",
+      "observed_allele": "CA",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:3",
+      "base_quality": null,
+      "event_id": "indel:deletion:5-5:A",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:15",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-phase",
+      "observed_allele": "CA",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": null,
+      "event_id": "indel:deletion:5-5:A",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:16",
+      "mapping_quality": 60,
+      "molecule_id": "phase-a-only",
+      "observed_allele": "CA",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": null,
+      "event_id": "indel:deletion:5-5:A",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:17",
+      "mapping_quality": 60,
+      "molecule_id": "phase-both",
+      "observed_allele": "CA",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": null,
+      "event_id": "indel:deletion:5-5:A",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:18",
+      "mapping_quality": 60,
+      "molecule_id": "reference",
+      "observed_allele": "CA",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:4",
+      "base_quality": 40,
+      "event_id": "indel:insertion:5:G",
+      "evidence_source": "cigar_alternative_small_indel",
+      "id": "observation:19",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-other",
+      "observed_allele": "AT",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:3",
+      "base_quality": 40,
+      "event_id": "indel:insertion:5:G",
+      "evidence_source": "cigar_small_indel",
+      "id": "observation:20",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-phase",
+      "observed_allele": "AG",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": null,
+      "event_id": "indel:insertion:5:G",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:21",
+      "mapping_quality": 60,
+      "molecule_id": "phase-a-only",
+      "observed_allele": "A",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": null,
+      "event_id": "indel:insertion:5:G",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:22",
+      "mapping_quality": 60,
+      "molecule_id": "phase-both",
+      "observed_allele": "A",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": null,
+      "event_id": "indel:insertion:5:G",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:23",
+      "mapping_quality": 60,
+      "molecule_id": "reference",
+      "observed_allele": "A",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:4",
+      "base_quality": 40,
+      "event_id": "indel:insertion:5:T",
+      "evidence_source": "cigar_small_indel",
+      "id": "observation:24",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-other",
+      "observed_allele": "AT",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:3",
+      "base_quality": 40,
+      "event_id": "indel:insertion:5:T",
+      "evidence_source": "cigar_alternative_small_indel",
+      "id": "observation:25",
+      "mapping_quality": 60,
+      "molecule_id": "insertion-phase",
+      "observed_allele": "AG",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": null,
+      "event_id": "indel:insertion:5:T",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:26",
+      "mapping_quality": 60,
+      "molecule_id": "phase-a-only",
+      "observed_allele": "A",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": null,
+      "event_id": "indel:insertion:5:T",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:27",
+      "mapping_quality": 60,
+      "molecule_id": "phase-both",
+      "observed_allele": "A",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": null,
+      "event_id": "indel:insertion:5:T",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:28",
+      "mapping_quality": 60,
+      "molecule_id": "reference",
+      "observed_allele": "A",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    }
+  ],
+  "phase_links": [
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 4,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 0.563502822,
+      "co_alternate_ci95_low": 0.03005337,
+      "co_alternate_fraction": 0.166666667,
+      "event_a_id": "snv:3:T:A",
+      "event_b_id": "snv:5:A:G",
+      "expected_co_alternate_fraction": 0.138888889,
+      "id": "phase:snv:3:T:A|snv:5:A:G",
+      "jointly_callable": 6,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.027777778,
+      "neither_alternate": 1,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        4
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 4,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 0.563502822,
+      "co_alternate_ci95_low": 0.03005337,
+      "co_alternate_fraction": 0.166666667,
+      "event_a_id": "snv:3:T:A",
+      "event_b_id": "indel:deletion:5-5:A",
+      "expected_co_alternate_fraction": 0.138888889,
+      "id": "phase:snv:3:T:A|indel:deletion:5-5:A",
+      "jointly_callable": 6,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.027777778,
+      "neither_alternate": 1,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        0
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 3,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 0.62446537,
+      "co_alternate_ci95_low": 0.036224109,
+      "co_alternate_fraction": 0.2,
+      "event_a_id": "snv:3:T:A",
+      "event_b_id": "indel:insertion:5:G",
+      "expected_co_alternate_fraction": 0.16,
+      "id": "phase:snv:3:T:A|indel:insertion:5:G",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.04,
+      "neither_alternate": 1,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        2
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 3,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 0.62446537,
+      "co_alternate_ci95_low": 0.036224109,
+      "co_alternate_fraction": 0.2,
+      "event_a_id": "snv:3:T:A",
+      "event_b_id": "indel:insertion:5:T",
+      "expected_co_alternate_fraction": 0.16,
+      "id": "phase:snv:3:T:A|indel:insertion:5:T",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.04,
+      "neither_alternate": 1,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        1
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 1,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.434482465,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "snv:5:A:G",
+      "event_b_id": "indel:deletion:5-5:A",
+      "expected_co_alternate_fraction": 0.0,
+      "id": "phase:snv:5:A:G|indel:deletion:5-5:A",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 4,
+      "qc_flags": [],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 1,
+      "a_alternate_b_absent": 1,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.434482465,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "snv:5:A:G",
+      "event_b_id": "indel:insertion:5:G",
+      "expected_co_alternate_fraction": 0.04,
+      "id": "phase:snv:5:A:G|indel:insertion:5:G",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": -0.04,
+      "neither_alternate": 3,
+      "qc_flags": [],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 1,
+      "a_alternate_b_absent": 1,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.434482465,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "snv:5:A:G",
+      "event_b_id": "indel:insertion:5:T",
+      "expected_co_alternate_fraction": 0.04,
+      "id": "phase:snv:5:A:G|indel:insertion:5:T",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": -0.04,
+      "neither_alternate": 3,
+      "qc_flags": [],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 1,
+      "a_alternate_b_absent": 0,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.434482465,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "indel:deletion:5-5:A",
+      "event_b_id": "indel:insertion:5:G",
+      "expected_co_alternate_fraction": 0.0,
+      "id": "phase:indel:deletion:5-5:A|indel:insertion:5:G",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 4,
+      "qc_flags": [],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 1,
+      "a_alternate_b_absent": 0,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.434482465,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "indel:deletion:5-5:A",
+      "event_b_id": "indel:insertion:5:T",
+      "expected_co_alternate_fraction": 0.0,
+      "id": "phase:indel:deletion:5-5:A|indel:insertion:5:T",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 4,
+      "qc_flags": [],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 1,
+      "a_alternate_b_absent": 1,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.434482465,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "indel:insertion:5:G",
+      "event_b_id": "indel:insertion:5:T",
+      "expected_co_alternate_fraction": 0.04,
+      "id": "phase:indel:insertion:5:G|indel:insertion:5:T",
+      "jointly_callable": 5,
+      "jointly_uncertain": 0,
+      "linkage_delta": -0.04,
+      "neither_alternate": 3,
+      "qc_flags": [],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": []
+    }
+  ],
+  "schema_version": "0.6",
+  "variants": [
+    {
+      "alt": "A",
+      "alt_depth": 6,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 7,
+      "ci95_high": 0.974320376,
+      "ci95_low": 0.486872171,
+      "conflict_depth": 0,
+      "end": 3,
+      "event_absent_depth": 0,
+      "event_id": "snv:3:T:A",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.857142857,
+      "homopolymer_context": {
+        "reference_base": "T",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 3,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "T",
+      "ref_depth": 1,
+      "start": 3,
+      "supporting_molecule_ids": [
+        "deletion-phase",
+        "insertion-other",
+        "insertion-phase",
+        "phase-a-only",
+        "phase-both",
+        "split-gap"
+      ],
+      "supporting_reads": [
+        "deletion-phase",
+        "insertion-other",
+        "insertion-phase",
+        "phase-a-only",
+        "phase-both",
+        "split-gap"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "G",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 6,
+      "ci95_high": 0.563502822,
+      "ci95_low": 0.03005337,
+      "conflict_depth": 0,
+      "end": 5,
+      "event_absent_depth": 0,
+      "event_id": "snv:5:A:G",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.166666667,
+      "homopolymer_context": {
+        "reference_base": "A",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 5,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "A",
+      "ref_depth": 5,
+      "start": 5,
+      "supporting_molecule_ids": [
+        "phase-both"
+      ],
+      "supporting_reads": [
+        "phase-both"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "C",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 6,
+      "ci95_high": 0.563502822,
+      "ci95_low": 0.03005337,
+      "conflict_depth": 0,
+      "end": 5,
+      "event_absent_depth": 5,
+      "event_id": "indel:deletion:5-5:A",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.166666667,
+      "homopolymer_context": {
+        "reference_base": "A",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "same_fragment_callable_deleted_span_with_flanks",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 5,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "CA",
+      "ref_depth": 5,
+      "start": 5,
+      "supporting_molecule_ids": [
+        "deletion-phase"
+      ],
+      "supporting_reads": [
+        "deletion-phase"
+      ],
+      "type": "SMALL_DELETION"
+    },
+    {
+      "alt": "AG",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 5,
+      "ci95_high": 0.62446537,
+      "ci95_low": 0.036224109,
+      "conflict_depth": 0,
+      "end": 5,
+      "event_absent_depth": 4,
+      "event_id": "indel:insertion:5:G",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.2,
+      "homopolymer_context": {
+        "reference_base": "A",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": true,
+      "negative_evidence_rule": "same_fragment_callable_reference_adjacency",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 1,
+      "position": 5,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT",
+        "MULTI_ALLELIC_LOCUS"
+      ],
+      "ref": "A",
+      "ref_depth": 3,
+      "start": 5,
+      "supporting_molecule_ids": [
+        "insertion-phase"
+      ],
+      "supporting_reads": [
+        "insertion-phase"
+      ],
+      "type": "SMALL_INSERTION"
+    },
+    {
+      "alt": "AT",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 5,
+      "ci95_high": 0.62446537,
+      "ci95_low": 0.036224109,
+      "conflict_depth": 0,
+      "end": 5,
+      "event_absent_depth": 4,
+      "event_id": "indel:insertion:5:T",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.2,
+      "homopolymer_context": {
+        "reference_base": "A",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": true,
+      "negative_evidence_rule": "same_fragment_callable_reference_adjacency",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 1,
+      "position": 5,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT",
+        "MULTI_ALLELIC_LOCUS"
+      ],
+      "ref": "A",
+      "ref_depth": 3,
+      "start": 5,
+      "supporting_molecule_ids": [
+        "insertion-other"
+      ],
+      "supporting_reads": [
+        "insertion-other"
+      ],
+      "type": "SMALL_INSERTION"
+    }
+  ]
+}

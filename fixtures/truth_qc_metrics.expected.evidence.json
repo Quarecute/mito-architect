@@ -1,0 +1,181 @@
+{
+  "input_alignment_records": 5,
+  "input_molecules": 5,
+  "numt_filtered_reads": 0,
+  "passed_reads": 5,
+  "reads": [
+    {
+      "flags": 0,
+      "id": "alt-center",
+      "mapping_quality": 60,
+      "snps": [
+        {
+          "alt": "A",
+          "position": 3,
+          "ref": "T"
+        }
+      ]
+    },
+    {
+      "flags": 16,
+      "id": "alt-end",
+      "mapping_quality": 60,
+      "snps": [
+        {
+          "alt": "A",
+          "position": 3,
+          "ref": "T"
+        }
+      ]
+    },
+    {
+      "flags": 16,
+      "id": "other-center",
+      "mapping_quality": 60,
+      "snps": [
+        {
+          "alt": "G",
+          "position": 3,
+          "ref": "T"
+        }
+      ]
+    },
+    {
+      "flags": 0,
+      "id": "ref-center",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 0,
+      "id": "repeat-alt",
+      "mapping_quality": 60,
+      "snps": [
+        {
+          "alt": "A",
+          "position": 3,
+          "ref": "T"
+        }
+      ]
+    }
+  ],
+  "schema_version": "0.5",
+  "variants": [
+    {
+      "allele_quality": {
+        "alternate": {
+          "count": 3,
+          "max_phred": 40,
+          "mean_phred": 30.0,
+          "min_phred": 20
+        },
+        "other": {
+          "count": 1,
+          "max_phred": 10,
+          "mean_phred": 10.0,
+          "min_phred": 10
+        },
+        "reference": {
+          "count": 1,
+          "max_phred": 40,
+          "mean_phred": 40.0,
+          "min_phred": 40
+        }
+      },
+      "alt": "A",
+      "alt_depth": 3,
+      "callable_depth": 5,
+      "ci95_high": 0.882379226,
+      "ci95_low": 0.230724281,
+      "heteroplasmy": 0.6,
+      "molecule_support": {
+        "alternate": 3,
+        "callable": 5,
+        "other": 1,
+        "reference": 1
+      },
+      "other_depth": 1,
+      "position": 3,
+      "read_position": {
+        "alternate_mean": 0.333333333,
+        "bias_delta": 0.666666667,
+        "definition": "normalized_center_proximity",
+        "other_mean": 1.0,
+        "reference_mean": 1.0
+      },
+      "ref": "T",
+      "ref_depth": 1,
+      "strand_bias_delta": 0.333333333,
+      "strand_support": {
+        "alt_forward": 2,
+        "alt_reverse": 1,
+        "other_forward": 0,
+        "other_reverse": 1,
+        "ref_forward": 1,
+        "ref_reverse": 0
+      },
+      "supporting_reads": [
+        "alt-center",
+        "alt-end",
+        "repeat-alt"
+      ]
+    },
+    {
+      "allele_quality": {
+        "alternate": {
+          "count": 1,
+          "max_phred": 10,
+          "mean_phred": 10.0,
+          "min_phred": 10
+        },
+        "other": {
+          "count": 3,
+          "max_phred": 40,
+          "mean_phred": 30.0,
+          "min_phred": 20
+        },
+        "reference": {
+          "count": 1,
+          "max_phred": 40,
+          "mean_phred": 40.0,
+          "min_phred": 40
+        }
+      },
+      "alt": "G",
+      "alt_depth": 1,
+      "callable_depth": 5,
+      "ci95_high": 0.62446537,
+      "ci95_low": 0.036224109,
+      "heteroplasmy": 0.2,
+      "molecule_support": {
+        "alternate": 1,
+        "callable": 5,
+        "other": 3,
+        "reference": 1
+      },
+      "other_depth": 3,
+      "position": 3,
+      "read_position": {
+        "alternate_mean": 1.0,
+        "bias_delta": 0.0,
+        "definition": "normalized_center_proximity",
+        "other_mean": 0.333333333,
+        "reference_mean": 1.0
+      },
+      "ref": "T",
+      "ref_depth": 1,
+      "strand_bias_delta": 1.0,
+      "strand_support": {
+        "alt_forward": 0,
+        "alt_reverse": 1,
+        "other_forward": 2,
+        "other_reverse": 1,
+        "ref_forward": 1,
+        "ref_reverse": 0
+      },
+      "supporting_reads": [
+        "other-center"
+      ]
+    }
+  ]
+}

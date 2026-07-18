@@ -2,8 +2,8 @@ import type { MitoAnalysisData } from '@mito-architect/visualization-lib';
 
 export const demoData: MitoAnalysisData = {
   metadata: {
-    schema_version: '0.4',
-    engine_version: '0.4.1',
+    schema_version: '0.5',
+    engine_version: '0.5.0-dev',
     sample: 'demo-mixed-haplogroups',
     input_path: 'fixtures/tiny.fastq',
     reference_path: 'core/data/rcrs.fasta',

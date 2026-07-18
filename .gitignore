@@ -29,6 +29,7 @@ visualization-lib/dist/
 tmp/
 .data/
 fixtures/generated/
+/core/data/rcrs.fasta.fai
 
 # Generated reports and local runtime files
 output.html
@@ -48,6 +49,7 @@ coverage-*/
 *.lcov
 *.profraw
 *.profdata
+gmon.out
 vgcore.*
 *.core
 core.[0-9]*

@@ -1,0 +1,88 @@
+{
+  "schema_version": "0.6",
+  "events": [
+    {
+      "id": "indel:deletion:523-524:AC",
+      "type": "SMALL_DELETION",
+      "start": 523,
+      "end": 524,
+      "length": 2,
+      "ref": "CAC",
+      "alt": "C",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "supporting_molecule_ids": ["repeat-left", "repeat-right"],
+      "evidence_counts": {
+        "alternate": 2,
+        "reference": 0,
+        "event_absent": 0,
+        "callable": 2,
+        "low_quality": 0,
+        "conflict": 0
+      }
+    },
+    {
+      "id": "indel:insertion:573:CCCC",
+      "type": "SMALL_INSERTION",
+      "start": 573,
+      "end": 573,
+      "length": 4,
+      "ref": "C",
+      "alt": "CCCCC",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "supporting_molecule_ids": ["repeat-left", "repeat-right"],
+      "evidence_counts": {
+        "alternate": 2,
+        "reference": 0,
+        "event_absent": 0,
+        "callable": 2,
+        "low_quality": 0,
+        "conflict": 0
+      }
+    },
+    {
+      "id": "indel:insertion:8289:CCCCCTCTA",
+      "type": "SMALL_INSERTION",
+      "start": 8289,
+      "end": 8289,
+      "length": 9,
+      "ref": "A",
+      "alt": "ACCCCCTCTA",
+      "normalization": "rcrs_3prime_small_indel_v1",
+      "supporting_molecule_ids": ["motif-left", "motif-right"],
+      "evidence_counts": {
+        "alternate": 2,
+        "reference": 0,
+        "event_absent": 0,
+        "callable": 2,
+        "low_quality": 0,
+        "conflict": 0
+      }
+    }
+  ],
+  "variants": [
+    {
+      "event_id": "indel:deletion:523-524:AC",
+      "alt_depth": 2,
+      "ref_depth": 0,
+      "event_absent_depth": 0,
+      "callable_depth": 2,
+      "supporting_molecule_ids": ["repeat-left", "repeat-right"]
+    },
+    {
+      "event_id": "indel:insertion:573:CCCC",
+      "alt_depth": 2,
+      "ref_depth": 0,
+      "event_absent_depth": 0,
+      "callable_depth": 2,
+      "supporting_molecule_ids": ["repeat-left", "repeat-right"]
+    },
+    {
+      "event_id": "indel:insertion:8289:CCCCCTCTA",
+      "alt_depth": 2,
+      "ref_depth": 0,
+      "event_absent_depth": 0,
+      "callable_depth": 2,
+      "supporting_molecule_ids": ["motif-left", "motif-right"]
+    }
+  ]
+}

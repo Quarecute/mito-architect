@@ -1,0 +1,742 @@
+{
+  "alignments": [
+    {
+      "flags": 0,
+      "id": "alignment:0",
+      "molecule_id": "MI:MOL-A",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 0
+    },
+    {
+      "flags": 0,
+      "id": "alignment:1",
+      "molecule_id": "MI:MOL-A",
+      "role": "primary_candidate",
+      "selected_representative": false,
+      "source_record_index": 1
+    },
+    {
+      "flags": 0,
+      "id": "alignment:2",
+      "molecule_id": "MI:MOL-B",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 2
+    },
+    {
+      "flags": 0,
+      "id": "alignment:3",
+      "molecule_id": "MI:MOL-B",
+      "role": "primary_candidate",
+      "selected_representative": false,
+      "source_record_index": 3
+    },
+    {
+      "flags": 0,
+      "id": "alignment:4",
+      "molecule_id": "UNASSIGNED:MI:missing-mi",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 4
+    },
+    {
+      "flags": 1024,
+      "id": "alignment:5",
+      "molecule_id": "MI:MOL-C",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 5
+    },
+    {
+      "flags": 0,
+      "id": "alignment:6",
+      "molecule_id": "MI:MOL-D",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 6
+    },
+    {
+      "flags": 2048,
+      "id": "alignment:7",
+      "molecule_id": "MI:MOL-A",
+      "role": "supplementary",
+      "selected_representative": false,
+      "source_record_index": 7
+    },
+    {
+      "flags": 2048,
+      "id": "alignment:8",
+      "molecule_id": "MI:MOL-D",
+      "role": "supplementary",
+      "selected_representative": false,
+      "source_record_index": 8
+    }
+  ],
+  "architectures": [],
+  "callability": [
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:4",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "UNASSIGNED:MI:missing-mi",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:0",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:7",
+          "callable_bases": 7,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 6
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:1",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "MI:MOL-A",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:2",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:3",
+          "callable_bases": 12,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "MI:MOL-B",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:5",
+          "callable_bases": 0,
+          "disrupted_adjacency_anchors": [],
+          "eligible": false,
+          "inserted_query_bases": 0,
+          "ranges": [],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "DUPLICATE_ALIGNMENT"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 0,
+      "callable_fraction": 0.0,
+      "known": false,
+      "molecule_id": "MI:MOL-C",
+      "ranges": [],
+      "status": "NOT_ASSESSABLE"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:6",
+          "callable_bases": 5,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 5,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:8",
+          "callable_bases": 7,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 6
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "known": true,
+      "molecule_id": "MI:MOL-D",
+      "ranges": [
+        {
+          "end": 12,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    }
+  ],
+  "events": [
+    {
+      "alt": "A",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 3,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 2,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "id": "snv:3:T:A",
+      "index": 0,
+      "length": 1,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "ref": "T",
+      "source_projection": "variants",
+      "start": 3,
+      "supporting_molecule_ids": [
+        "MI:MOL-A"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": null,
+      "assessability": "ALTERNATE_SUPPORT_ONLY",
+      "component_event_ids": [],
+      "end": 12,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "sv:duplication:1-12",
+      "index": 1,
+      "length": 12,
+      "negative_evidence_rule": "support_only_no_negative_inference",
+      "normalization": "canonical_mtdna_adjacency_v1",
+      "ref": null,
+      "source_projection": "svs",
+      "start": 1,
+      "supporting_molecule_ids": [
+        "MI:MOL-A"
+      ],
+      "type": "SV_DUPLICATION"
+    }
+  ],
+  "evidence_encoding": {
+    "layout": "paged_columnar_molecule_event",
+    "missing_pair_state": "NOT_CALLABLE",
+    "observation_count": 3,
+    "observation_limit": 5000000,
+    "observation_page_count": 1,
+    "observation_page_size": 3,
+    "observation_storage": "embedded_columnar_pages",
+    "phase_link_limit": 1000000,
+    "phase_molecule_policy": "evidence_eligible_only",
+    "phase_molecule_reference": "molecules[].index",
+    "phase_null_model": "independent_marginals_within_jointly_callable",
+    "scope": "snv_indel_sv_complex_evidence_rc2"
+  },
+  "input_alignment_records": 9,
+  "input_molecules": 5,
+  "molecules": [
+    {
+      "alignment_ids": [
+        "alignment:4"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": true,
+      "analysis_eligible": false,
+      "assembly_status": "missing_explicit_molecule_id",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": false,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [
+        "MISSING_MOLECULE_ID_TAG"
+      ],
+      "id": "UNASSIGNED:MI:missing-mi",
+      "identity_policy": "sam_tag:MI",
+      "index": 0,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "DUPLEX_METADATA_RECORDED",
+        "EXPLICIT_MOLECULE_ID",
+        "UMI_RECORDED"
+      ],
+      "protocol_metadata": {
+        "DUPLEX_tag": "DX",
+        "DUPLEX_value": "simplex",
+        "UMI_tag": "RX",
+        "UMI_value": "TTTT",
+        "molecule_id_tag": "MI"
+      },
+      "query_length": 12,
+      "representative_alignment_id": "alignment:4",
+      "source_qnames": [
+        "missing-mi"
+      ],
+      "warnings": [
+        "MISSING_MOLECULE_ID_TAG"
+      ]
+    },
+    {
+      "alignment_ids": [
+        "alignment:0",
+        "alignment:7",
+        "alignment:1"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A",
+        "sv:duplication:1-12"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "explicit_tag_multi_qname_group",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 1,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 2,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "MI:MOL-A",
+      "identity_policy": "sam_tag:MI",
+      "index": 1,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 2,
+      "protocol_flags": [
+        "DUPLEX_METADATA_RECORDED",
+        "EXPLICIT_MOLECULE_ID",
+        "MULTI_QNAME_MOLECULE",
+        "SUPPLEMENTARY_EVIDENCE_PRESENT",
+        "UMI_RECORDED"
+      ],
+      "protocol_metadata": {
+        "DUPLEX_tag": "DX",
+        "DUPLEX_value": "duplex",
+        "UMI_tag": "RX",
+        "UMI_value": "AAAA",
+        "molecule_id_tag": "MI",
+        "molecule_id_value": "MOL-A"
+      },
+      "query_length": 12,
+      "representative_alignment_id": "alignment:0",
+      "source_qnames": [
+        "mol-a-1",
+        "mol-a-2"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:2",
+        "alignment:3"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": true,
+      "analysis_eligible": false,
+      "assembly_status": "explicit_tag_multi_qname_group",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": false,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [
+        "CONFLICTING_UMI_TAG_VALUES"
+      ],
+      "id": "MI:MOL-B",
+      "identity_policy": "sam_tag:MI",
+      "index": 2,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 2,
+      "protocol_flags": [
+        "DUPLEX_METADATA_RECORDED",
+        "EXPLICIT_MOLECULE_ID",
+        "MULTI_QNAME_MOLECULE"
+      ],
+      "protocol_metadata": {
+        "DUPLEX_tag": "DX",
+        "DUPLEX_value": "simplex",
+        "UMI_tag": "RX",
+        "molecule_id_tag": "MI",
+        "molecule_id_value": "MOL-B"
+      },
+      "query_length": 12,
+      "representative_alignment_id": "alignment:2",
+      "source_qnames": [
+        "mol-b-1",
+        "mol-b-2"
+      ],
+      "warnings": [
+        "CONFLICTING_UMI_TAG_VALUES"
+      ]
+    },
+    {
+      "alignment_ids": [
+        "alignment:5"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": false,
+      "analysis_eligible": false,
+      "assembly_status": "explicit_tag_single_qname_group",
+      "callability_status": "NOT_ASSESSABLE",
+      "callable_bases": 0,
+      "callable_fraction": 0.0,
+      "cluster_id": 0,
+      "evidence_eligible": false,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [
+        "NO_ELIGIBLE_PRIMARY_EVIDENCE"
+      ],
+      "id": "MI:MOL-C",
+      "identity_policy": "sam_tag:MI",
+      "index": 3,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "DUPLEX_METADATA_RECORDED",
+        "EXPLICIT_MOLECULE_ID",
+        "SAM_DUPLICATE_FLAG_PRESENT",
+        "UMI_RECORDED"
+      ],
+      "protocol_metadata": {
+        "DUPLEX_tag": "DX",
+        "DUPLEX_value": "simplex",
+        "UMI_tag": "RX",
+        "UMI_value": "ACAC",
+        "molecule_id_tag": "MI",
+        "molecule_id_value": "MOL-C"
+      },
+      "query_length": 12,
+      "representative_alignment_id": "alignment:5",
+      "source_qnames": [
+        "duplicate-only"
+      ],
+      "warnings": [
+        "NO_ELIGIBLE_PRIMARY_EVIDENCE"
+      ]
+    },
+    {
+      "alignment_ids": [
+        "alignment:6",
+        "alignment:8"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "explicit_tag_single_qname_group",
+      "callability_status": "ASSESSED",
+      "callable_bases": 12,
+      "callable_fraction": 0.000724244,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "exclusion_reasons": [],
+      "id": "MI:MOL-D",
+      "identity_policy": "sam_tag:MI",
+      "index": 4,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "DUPLEX_METADATA_RECORDED",
+        "EXPLICIT_MOLECULE_ID",
+        "SUPPLEMENTARY_EVIDENCE_PRESENT",
+        "UMI_RECORDED"
+      ],
+      "protocol_metadata": {
+        "DUPLEX_tag": "DX",
+        "DUPLEX_value": "simplex",
+        "UMI_tag": "RX",
+        "UMI_value": "TATA",
+        "molecule_id_tag": "MI",
+        "molecule_id_value": "MOL-D"
+      },
+      "query_length": 5,
+      "representative_alignment_id": "alignment:6",
+      "source_qnames": [
+        "partial-tag"
+      ],
+      "warnings": [
+        "PARTIAL_MOLECULE_ID_TAG_INHERITED"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:0",
+      "mapping_quality": 60,
+      "molecule_id": "MI:MOL-A",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:6",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:1",
+      "mapping_quality": 60,
+      "molecule_id": "MI:MOL-D",
+      "observed_allele": "T",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": null,
+      "event_id": "sv:duplication:1-12",
+      "evidence_source": "normalized_sv_support",
+      "id": "observation:2",
+      "mapping_quality": 60,
+      "molecule_id": "MI:MOL-A",
+      "observed_allele": "<DUPLICATION>",
+      "state": "ALTERNATE",
+      "strand": "+"
+    }
+  ],
+  "phase_links": [
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 0,
+      "assessability": "SUPPORT_CONDITIONED",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 1.0,
+      "co_alternate_ci95_low": 0.206549314,
+      "co_alternate_fraction": 1.0,
+      "event_a_id": "snv:3:T:A",
+      "event_b_id": "sv:duplication:1-12",
+      "expected_co_alternate_fraction": 1.0,
+      "id": "phase:snv:3:T:A|sv:duplication:1-12",
+      "jointly_callable": 1,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 0,
+      "qc_flags": [
+        "SUPPORT_CONDITIONED"
+      ],
+      "supporting_molecule_indices": [
+        1
+      ],
+      "uncertain_molecule_indices": []
+    }
+  ],
+  "schema_version": "0.6",
+  "variants": [
+    {
+      "alt": "A",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 2,
+      "ci95_high": 0.905468794,
+      "ci95_low": 0.094531206,
+      "conflict_depth": 0,
+      "end": 3,
+      "event_absent_depth": 0,
+      "event_id": "snv:3:T:A",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.5,
+      "homopolymer_context": {
+        "reference_base": "T",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 3,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "T",
+      "ref_depth": 1,
+      "start": 3,
+      "supporting_molecule_ids": [
+        "MI:MOL-A"
+      ],
+      "supporting_reads": [
+        "MI:MOL-A"
+      ],
+      "type": "SNV"
+    }
+  ]
+}

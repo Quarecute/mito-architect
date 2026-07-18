@@ -1,0 +1,10 @@
+@SQ	SN:NC_012920.1	LN:16569
+assembled	0	NC_012920.1	1	60	3M	*	0	0	GAA	III
+assembled	2048	NC_012920.1	10	60	3M	*	0	0	CCC	III	NM:i:0
+conflict	0	NC_012920.1	1	60	3M16566D3M	*	0	0	GAAGAT	IIIIII
+low-quality	0	NC_012920.1	1	60	3M	*	0	0	GAA	!!!
+multiple-primary	0	NC_012920.1	1	60	3M	*	0	0	GAT	III
+multiple-primary	16	NC_012920.1	1	60	3M	*	0	0	GAT	III
+snp-alt	0	NC_012920.1	1	60	3M	*	0	0	GAA	III
+snp-ref	0	NC_012920.1	1	60	3M	*	0	0	GAT	III
+secondary-only	256	NC_012920.1	1	60	3M	*	0	0	GAT	III

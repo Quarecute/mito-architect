@@ -18,7 +18,7 @@ and MUST NOT be parsed. A failed analysis returns no partial scientific JSON.
 | `MITO-E1302` | required resource is malformed/incomplete | replace with verified bundle |
 | `MITO-E1401` | compiled dependency/capability unavailable | install dependency and rebuild |
 | `MITO-E1501` | cooperative cancellation | submit a new job if desired |
-| `MITO-E1601` | memory/resource allocation failed | reduce workload or increase limit |
+| `MITO-E1601` | memory allocation or configured observation/phase/resource bound was exceeded | reduce/page the workload or increase a reviewed limit |
 | `MITO-E9001` | internal invariant or unknown failure | preserve evidence and report defect |
 
 The C ABI exposes `mito_engine_get_last_error_code()` and

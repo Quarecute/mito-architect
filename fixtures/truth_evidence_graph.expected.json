@@ -1,0 +1,1066 @@
+{
+  "alignments": [
+    {
+      "flags": 0,
+      "id": "alignment:0",
+      "molecule_id": "assembled",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 0
+    },
+    {
+      "flags": 2048,
+      "id": "alignment:1",
+      "molecule_id": "assembled",
+      "role": "supplementary",
+      "selected_representative": false,
+      "source_record_index": 1
+    },
+    {
+      "flags": 0,
+      "id": "alignment:2",
+      "molecule_id": "conflict",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 2
+    },
+    {
+      "flags": 0,
+      "id": "alignment:3",
+      "molecule_id": "low-quality",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 3
+    },
+    {
+      "flags": 0,
+      "id": "alignment:4",
+      "molecule_id": "multiple-primary",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 4
+    },
+    {
+      "flags": 16,
+      "id": "alignment:5",
+      "molecule_id": "multiple-primary",
+      "role": "primary_candidate",
+      "selected_representative": false,
+      "source_record_index": 5
+    },
+    {
+      "flags": 0,
+      "id": "alignment:6",
+      "molecule_id": "snp-alt",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 6
+    },
+    {
+      "flags": 0,
+      "id": "alignment:7",
+      "molecule_id": "snp-ref",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 7
+    },
+    {
+      "flags": 256,
+      "id": "alignment:8",
+      "molecule_id": "secondary-only",
+      "role": "secondary",
+      "selected_representative": true,
+      "source_record_index": 8
+    }
+  ],
+  "architectures": [],
+  "callability": [
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:0",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 3,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:1",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 12,
+              "start": 10
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 6,
+      "callable_fraction": 0.000362122,
+      "known": true,
+      "molecule_id": "assembled",
+      "ranges": [
+        {
+          "end": 3,
+          "start": 1
+        },
+        {
+          "end": 12,
+          "start": 10
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:2",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 3,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {
+            "DELETION_FROM_REFERENCE_PATH": 16566
+          },
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "known": true,
+      "molecule_id": "conflict",
+      "ranges": [
+        {
+          "end": 3,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:3",
+          "callable_bases": 0,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [],
+          "reference_exclusion_counts": {
+            "LOW_OR_INVALID_BASE_QUALITY": 3
+          },
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 0,
+      "callable_fraction": 0.0,
+      "known": true,
+      "molecule_id": "low-quality",
+      "ranges": [],
+      "status": "ASSESSED_EMPTY"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:4",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 3,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        },
+        {
+          "alignment_id": "alignment:5",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 3,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "known": true,
+      "molecule_id": "multiple-primary",
+      "ranges": [
+        {
+          "end": 3,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:8",
+          "callable_bases": 0,
+          "disrupted_adjacency_anchors": [],
+          "eligible": false,
+          "inserted_query_bases": 0,
+          "ranges": [],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "SECONDARY_ALIGNMENT"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 0,
+      "callable_fraction": 0.0,
+      "known": false,
+      "molecule_id": "secondary-only",
+      "ranges": [],
+      "status": "NOT_ASSESSABLE"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:6",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 3,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "known": true,
+      "molecule_id": "snp-alt",
+      "ranges": [
+        {
+          "end": 3,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:7",
+          "callable_bases": 3,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 3,
+              "start": 1
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "known": true,
+      "molecule_id": "snp-ref",
+      "ranges": [
+        {
+          "end": 3,
+          "start": 1
+        }
+      ],
+      "status": "ASSESSED"
+    }
+  ],
+  "events": [
+    {
+      "alt": "C",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 10,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "snv:10:T:C",
+      "index": 0,
+      "length": 1,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "ref": "T",
+      "source_projection": "variants",
+      "start": 10,
+      "supporting_molecule_ids": [
+        "assembled"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "C",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 12,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "snv:12:T:C",
+      "index": 1,
+      "length": 1,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "ref": "T",
+      "source_projection": "variants",
+      "start": 12,
+      "supporting_molecule_ids": [
+        "assembled"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "A",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 3,
+      "evidence_counts": {
+        "alternate": 2,
+        "callable": 3,
+        "conflict": 1,
+        "event_absent": 0,
+        "low_quality": 1,
+        "reference": 1
+      },
+      "id": "snv:3:T:A",
+      "index": 2,
+      "length": 1,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "ref": "T",
+      "source_projection": "variants",
+      "start": 3,
+      "supporting_molecule_ids": [
+        "assembled",
+        "snp-alt"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": null,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 16569,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "sv:deletion:4-16569",
+      "index": 3,
+      "length": 16566,
+      "negative_evidence_rule": "same_fragment_callable_deleted_span_with_flanks",
+      "normalization": "canonical_mtdna_adjacency_v1",
+      "ref": null,
+      "source_projection": "svs",
+      "start": 4,
+      "supporting_molecule_ids": [
+        "conflict"
+      ],
+      "type": "SV_DELETION"
+    }
+  ],
+  "evidence_encoding": {
+    "layout": "paged_columnar_molecule_event",
+    "missing_pair_state": "NOT_CALLABLE",
+    "observation_count": 8,
+    "observation_limit": 5000000,
+    "observation_page_count": 3,
+    "observation_page_size": 3,
+    "observation_storage": "embedded_columnar_pages",
+    "phase_link_limit": 1000000,
+    "phase_molecule_policy": "evidence_eligible_only",
+    "phase_molecule_reference": "molecules[].index",
+    "phase_null_model": "independent_marginals_within_jointly_callable",
+    "scope": "snv_indel_sv_complex_evidence_rc2"
+  },
+  "input_alignment_records": 9,
+  "input_molecules": 7,
+  "molecules": [
+    {
+      "alignment_ids": [
+        "alignment:0",
+        "alignment:1"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A",
+        "snv:10:T:C",
+        "snv:12:T:C"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 6,
+      "callable_fraction": 0.000362122,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 3,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "assembled",
+      "identity_policy": "sam_qname",
+      "index": 0,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY",
+        "SUPPLEMENTARY_EVIDENCE_PRESENT"
+      ],
+      "protocol_metadata": {},
+      "query_length": 3,
+      "representative_alignment_id": "alignment:0",
+      "source_qnames": [
+        "assembled"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:2"
+      ],
+      "alternate_event_ids": [
+        "sv:deletion:4-16569"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "cluster_id": 1,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 1,
+        "conflict": 1,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "conflict",
+      "identity_policy": "sam_qname",
+      "index": 1,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "ORIGIN_SPANNING_ALIGNMENT",
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 6,
+      "representative_alignment_id": "alignment:2",
+      "source_qnames": [
+        "conflict"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:3"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED_EMPTY",
+      "callable_bases": 0,
+      "callable_fraction": 0.0,
+      "cluster_id": 2,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 1,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "low-quality",
+      "identity_policy": "sam_qname",
+      "index": 2,
+      "mapping_quality": 60,
+      "mean_base_quality": 0.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 3,
+      "representative_alignment_id": "alignment:3",
+      "source_qnames": [
+        "low-quality"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:4",
+        "alignment:5"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": true,
+      "analysis_eligible": false,
+      "assembly_status": "first_of_multiple_primaries",
+      "callability_status": "ASSESSED",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "cluster_id": 2,
+      "evidence_eligible": false,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [
+        "MULTIPLE_PRIMARY_ALIGNMENTS"
+      ],
+      "id": "multiple-primary",
+      "identity_policy": "sam_qname",
+      "index": 3,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 2,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 3,
+      "representative_alignment_id": "alignment:4",
+      "source_qnames": [
+        "multiple-primary"
+      ],
+      "warnings": [
+        "MULTIPLE_PRIMARY_ALIGNMENTS"
+      ]
+    },
+    {
+      "alignment_ids": [
+        "alignment:8"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": true,
+      "analysis_eligible": false,
+      "assembly_status": "fallback_without_primary",
+      "callability_status": "NOT_ASSESSABLE",
+      "callable_bases": 0,
+      "callable_fraction": 0.0,
+      "cluster_id": 2,
+      "evidence_eligible": false,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [
+        "NO_PRIMARY_ALIGNMENT"
+      ],
+      "id": "secondary-only",
+      "identity_policy": "sam_qname",
+      "index": 4,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 0,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY",
+        "SECONDARY_EVIDENCE_PRESENT"
+      ],
+      "protocol_metadata": {},
+      "query_length": 3,
+      "representative_alignment_id": "alignment:8",
+      "source_qnames": [
+        "secondary-only"
+      ],
+      "warnings": [
+        "NO_PRIMARY_ALIGNMENT"
+      ]
+    },
+    {
+      "alignment_ids": [
+        "alignment:6"
+      ],
+      "alternate_event_ids": [
+        "snv:3:T:A"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "snp-alt",
+      "identity_policy": "sam_qname",
+      "index": 5,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 3,
+      "representative_alignment_id": "alignment:6",
+      "source_qnames": [
+        "snp-alt"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:7"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 3,
+      "callable_fraction": 0.000181061,
+      "cluster_id": 2,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 1
+      },
+      "exclusion_reasons": [],
+      "id": "snp-ref",
+      "identity_policy": "sam_qname",
+      "index": 6,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 3,
+      "representative_alignment_id": "alignment:7",
+      "source_qnames": [
+        "snp-ref"
+      ],
+      "warnings": []
+    }
+  ],
+  "observations": [
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:0",
+      "mapping_quality": 60,
+      "molecule_id": "assembled",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": 40,
+      "event_id": "snv:10:T:C",
+      "evidence_source": "aligned_base",
+      "id": "observation:1",
+      "mapping_quality": 60,
+      "molecule_id": "assembled",
+      "observed_allele": "C",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": 40,
+      "event_id": "snv:12:T:C",
+      "evidence_source": "aligned_base",
+      "id": "observation:2",
+      "mapping_quality": 60,
+      "molecule_id": "assembled",
+      "observed_allele": "C",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": null,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:3",
+      "mapping_quality": 60,
+      "molecule_id": "conflict",
+      "observed_allele": null,
+      "state": "CONFLICT",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:3",
+      "base_quality": null,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:4",
+      "mapping_quality": 60,
+      "molecule_id": "low-quality",
+      "observed_allele": null,
+      "state": "LOW_QUALITY",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:6",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:5",
+      "mapping_quality": 60,
+      "molecule_id": "snp-alt",
+      "observed_allele": "A",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:7",
+      "base_quality": 40,
+      "event_id": "snv:3:T:A",
+      "evidence_source": "aligned_base",
+      "id": "observation:6",
+      "mapping_quality": 60,
+      "molecule_id": "snp-ref",
+      "observed_allele": "T",
+      "state": "REFERENCE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:2",
+      "base_quality": null,
+      "event_id": "sv:deletion:4-16569",
+      "evidence_source": "normalized_sv_support",
+      "id": "observation:7",
+      "mapping_quality": 60,
+      "molecule_id": "conflict",
+      "observed_allele": "<DELETION>",
+      "state": "ALTERNATE",
+      "strand": "+"
+    }
+  ],
+  "phase_links": [
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 0,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 1.0,
+      "co_alternate_ci95_low": 0.206549314,
+      "co_alternate_fraction": 1.0,
+      "event_a_id": "snv:10:T:C",
+      "event_b_id": "snv:12:T:C",
+      "expected_co_alternate_fraction": 1.0,
+      "id": "phase:snv:10:T:C|snv:12:T:C",
+      "jointly_callable": 1,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 0,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        0
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 0,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 1.0,
+      "co_alternate_ci95_low": 0.206549314,
+      "co_alternate_fraction": 1.0,
+      "event_a_id": "snv:10:T:C",
+      "event_b_id": "snv:3:T:A",
+      "expected_co_alternate_fraction": 1.0,
+      "id": "phase:snv:10:T:C|snv:3:T:A",
+      "jointly_callable": 1,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 0,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        0
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 0,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 1,
+      "co_alternate_ci95_high": 1.0,
+      "co_alternate_ci95_low": 0.206549314,
+      "co_alternate_fraction": 1.0,
+      "event_a_id": "snv:12:T:C",
+      "event_b_id": "snv:3:T:A",
+      "expected_co_alternate_fraction": 1.0,
+      "id": "phase:snv:12:T:C|snv:3:T:A",
+      "jointly_callable": 1,
+      "jointly_uncertain": 0,
+      "linkage_delta": 0.0,
+      "neither_alternate": 0,
+      "qc_flags": [],
+      "supporting_molecule_indices": [
+        0
+      ],
+      "uncertain_molecule_indices": []
+    },
+    {
+      "a_absent_b_alternate": 0,
+      "a_alternate_b_absent": 0,
+      "assessability": "COMPLETE_FOR_BOTH_EVENTS",
+      "both_alternate": 0,
+      "co_alternate_ci95_high": 0.0,
+      "co_alternate_ci95_low": 0.0,
+      "co_alternate_fraction": 0.0,
+      "event_a_id": "snv:3:T:A",
+      "event_b_id": "sv:deletion:4-16569",
+      "expected_co_alternate_fraction": 0.0,
+      "id": "phase:snv:3:T:A|sv:deletion:4-16569",
+      "jointly_callable": 0,
+      "jointly_uncertain": 1,
+      "linkage_delta": 0.0,
+      "neither_alternate": 0,
+      "qc_flags": [
+        "UNCERTAIN_COOCCURRENCE_EXCLUDED"
+      ],
+      "supporting_molecule_indices": [],
+      "uncertain_molecule_indices": [
+        1
+      ]
+    }
+  ],
+  "schema_version": "0.6",
+  "variants": [
+    {
+      "alt": "C",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 1,
+      "ci95_high": 1.0,
+      "ci95_low": 0.206549314,
+      "conflict_depth": 0,
+      "end": 10,
+      "event_absent_depth": 0,
+      "event_id": "snv:10:T:C",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 1.0,
+      "homopolymer_context": {
+        "reference_base": "T",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 10,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "T",
+      "ref_depth": 0,
+      "start": 10,
+      "supporting_molecule_ids": [
+        "assembled"
+      ],
+      "supporting_reads": [
+        "assembled"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "C",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 1,
+      "ci95_high": 1.0,
+      "ci95_low": 0.206549314,
+      "conflict_depth": 0,
+      "end": 12,
+      "event_absent_depth": 0,
+      "event_id": "snv:12:T:C",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 1.0,
+      "homopolymer_context": {
+        "reference_base": "T",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 12,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "T",
+      "ref_depth": 0,
+      "start": 12,
+      "supporting_molecule_ids": [
+        "assembled"
+      ],
+      "supporting_reads": [
+        "assembled"
+      ],
+      "type": "SNV"
+    },
+    {
+      "alt": "A",
+      "alt_depth": 2,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 3,
+      "ci95_high": 0.938508055,
+      "ci95_low": 0.207659601,
+      "conflict_depth": 1,
+      "end": 3,
+      "event_absent_depth": 0,
+      "event_id": "snv:3:T:A",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.666666667,
+      "homopolymer_context": {
+        "reference_base": "T",
+        "run_length": 1
+      },
+      "length": 1,
+      "low_quality_depth": 1,
+      "multi_allelic": false,
+      "negative_evidence_rule": "callable_base_allele",
+      "normalization": "rcrs_circular_snv_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 3,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "CONFLICTING_MOLECULE",
+        "LOW_QUALITY_OBSERVATIONS",
+        "SINGLE_STRAND_ALT_SUPPORT"
+      ],
+      "ref": "T",
+      "ref_depth": 1,
+      "start": 3,
+      "supporting_molecule_ids": [
+        "assembled",
+        "snp-alt"
+      ],
+      "supporting_reads": [
+        "assembled",
+        "snp-alt"
+      ],
+      "type": "SNV"
+    }
+  ]
+}

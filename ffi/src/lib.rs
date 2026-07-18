@@ -11,7 +11,7 @@ unsafe extern "C" {
     fn mito_engine_version() -> *const c_char;
     fn mito_engine_schema_version() -> *const c_char;
     fn mito_engine_error_schema_version() -> *const c_char;
-    fn mito_engine_analyze_with_config_v2(
+    fn mito_engine_analyze_with_config_v5(
         engine: *mut c_void,
         input_path: *const c_char,
         ref_path: *const c_char,
@@ -22,6 +22,13 @@ unsafe extern "C" {
         excluded_snp_flags: u16,
         numt_threshold: f64,
         allow_development_tags: bool,
+        emit_evidence_graph: bool,
+        max_evidence_observations: usize,
+        max_phase_links: usize,
+        evidence_page_size: usize,
+        molecule_id_tag: *const c_char,
+        umi_tag: *const c_char,
+        duplex_tag: *const c_char,
         should_cancel: Option<unsafe extern "C" fn(*mut c_void) -> bool>,
         cancel_user_data: *mut c_void,
     ) -> *const c_char;
@@ -99,6 +106,9 @@ impl MitoEngine {
         let reference_ptr = reference
             .as_ref()
             .map_or(std::ptr::null(), |value| value.as_ptr());
+        let molecule_id_tag = protocol_tag_to_cstring(&options.molecule_id_tag)?;
+        let umi_tag = protocol_tag_to_cstring(&options.umi_tag)?;
+        let duplex_tag = protocol_tag_to_cstring(&options.duplex_tag)?;
         let (callback, user_data) = cancel_flag.map_or((None, std::ptr::null_mut()), |flag| {
             (
                 Some(cancel_callback as unsafe extern "C" fn(*mut c_void) -> bool),
@@ -106,7 +116,7 @@ impl MitoEngine {
             )
         });
         let result = unsafe {
-            mito_engine_analyze_with_config_v2(
+            mito_engine_analyze_with_config_v5(
                 self.raw,
                 input.as_ptr(),
                 reference_ptr,
@@ -117,6 +127,13 @@ impl MitoEngine {
                 options.excluded_snp_flags,
                 options.numt_threshold,
                 options.allow_development_tags,
+                options.emit_evidence_graph,
+                options.max_evidence_observations,
+                options.max_phase_links,
+                options.evidence_page_size,
+                molecule_id_tag.as_ptr(),
+                umi_tag.as_ptr(),
+                duplex_tag.as_ptr(),
                 callback,
                 user_data,
             )
@@ -141,6 +158,15 @@ fn static_c_string(value: *const c_char) -> String {
     unsafe { CStr::from_ptr(value) }
         .to_string_lossy()
         .into_owned()
+}
+
+fn protocol_tag_to_cstring(value: &str) -> Result<CString, MitoError> {
+    CString::new(value).map_err(|_| {
+        MitoError::new(
+            "MITO-E1001",
+            "protocol SAM tag contains an interior NUL byte",
+        )
+    })
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -192,7 +218,7 @@ impl Drop for MitoEngine {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct AnalyzeOptions {
     pub filter_numt: bool,
     pub threads: usize,
@@ -201,6 +227,13 @@ pub struct AnalyzeOptions {
     pub excluded_snp_flags: u16,
     pub numt_threshold: f64,
     pub allow_development_tags: bool,
+    pub emit_evidence_graph: bool,
+    pub max_evidence_observations: usize,
+    pub max_phase_links: usize,
+    pub evidence_page_size: usize,
+    pub molecule_id_tag: String,
+    pub umi_tag: String,
+    pub duplex_tag: String,
 }
 
 impl Default for AnalyzeOptions {
@@ -213,6 +246,13 @@ impl Default for AnalyzeOptions {
             excluded_snp_flags: 0xF00,
             numt_threshold: 0.30,
             allow_development_tags: false,
+            emit_evidence_graph: false,
+            max_evidence_observations: 5_000_000,
+            max_phase_links: 1_000_000,
+            evidence_page_size: 4096,
+            molecule_id_tag: String::new(),
+            umi_tag: String::new(),
+            duplex_tag: String::new(),
         }
     }
 }
@@ -295,6 +335,76 @@ mod tests {
         assert_eq!(error.code, "MITO-E1501");
         assert_eq!(error.message, "analysis cancelled");
         assert!(cancel.load(Ordering::Relaxed));
+        let _ = fs::remove_file(input_path);
+    }
+
+    #[test]
+    fn evidence_graph_is_opt_in_and_bounded() {
+        let input_path = temp_path("evidence-graph", "sam");
+        fs::write(
+            &input_path,
+            "@SQ\tSN:NC_012920.1\tLN:16569\nalt\t0\tNC_012920.1\t1\t60\t3M\t*\t0\t0\tGAA\tIII\nreference\t0\tNC_012920.1\t1\t60\t3M\t*\t0\t0\tGAT\tIII\n",
+        )
+        .expect("evidence input");
+
+        let engine = MitoEngine::new().expect("engine");
+        let json = engine
+            .analyze_with_options(
+                &input_path,
+                None,
+                AnalyzeOptions {
+                    emit_evidence_graph: true,
+                    evidence_page_size: 1,
+                    ..AnalyzeOptions::default()
+                },
+            )
+            .expect("schema 0.6 result");
+        assert!(json.contains("\"schema_version\":\"0.6\""));
+        assert!(json.contains("\"missing_pair_state\":\"NOT_CALLABLE\""));
+        assert!(json.contains("\"layout\":\"paged_columnar_molecule_event\""));
+        assert!(json.contains("\"observation_page_size\":1"));
+
+        let error = engine
+            .analyze_with_options(
+                &input_path,
+                None,
+                AnalyzeOptions {
+                    emit_evidence_graph: true,
+                    max_evidence_observations: 1,
+                    ..AnalyzeOptions::default()
+                },
+            )
+            .expect_err("observation cap must fail closed");
+        assert_eq!(error.code, "MITO-E1601");
+        let _ = fs::remove_file(input_path);
+    }
+
+    #[test]
+    fn protocol_tags_cross_the_versioned_ffi_boundary() {
+        let input_path = temp_path("protocol-tags", "sam");
+        fs::write(
+            &input_path,
+            "@SQ\tSN:NC_012920.1\tLN:16569\nread-a\t0\tNC_012920.1\t1\t60\t3M\t*\t0\t0\tGAA\tIII\tMI:Z:M1\tRX:Z:AAA\tDX:Z:duplex\n",
+        )
+        .expect("protocol input");
+        let engine = MitoEngine::new().expect("engine");
+        let json = engine
+            .analyze_with_options(
+                &input_path,
+                None,
+                AnalyzeOptions {
+                    emit_evidence_graph: true,
+                    molecule_id_tag: "MI".to_owned(),
+                    umi_tag: "RX".to_owned(),
+                    duplex_tag: "DX".to_owned(),
+                    ..AnalyzeOptions::default()
+                },
+            )
+            .expect("tagged schema 0.6 result");
+        assert!(json.contains("\"identity_policy\":\"sam_tag:MI\""));
+        assert!(json.contains("\"molecule_id_value\":\"M1\""));
+        assert!(json.contains("\"UMI_RECORDED\""));
+        assert!(json.contains("\"DUPLEX_METADATA_RECORDED\""));
         let _ = fs::remove_file(input_path);
     }
 

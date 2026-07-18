@@ -12,11 +12,21 @@ cargo check --workspace --offline
 cargo test --workspace --offline
 cargo clippy --workspace --all-targets --offline -- -D warnings
 cargo run -p mito-cli --offline -- doctor
+cargo run --quiet -p mito-cli --offline -- analyze \
+  --input fixtures/tiny.fastq --json \
+  | jq -e '
+      .metadata.schema_version == "0.5"
+      and .filter_stats.input_molecules == 4
+      and (.reads | length == 4)
+    ' >/dev/null
+echo "Documented tiny FASTQ CLI smoke passed"
 
 npm run typecheck
 npm run build
 node web/src/lib/proteinStructureSources.test.mjs
+node web/src/lib/analysisNavigation.test.mjs
 bash scripts/verify_resources.sh
+bash scripts/verify_rc1_evidence.sh
 
 if [[ -f web/public/structures/manifest.sha256 ]]; then
   (
@@ -52,10 +62,67 @@ cargo run -p mito-cli --offline -- validate-sv-fixture \
   --input fixtures/truth_split.sam \
   --expected-json fixtures/truth_split.expected.svs.json
 
+cargo run -p mito-cli --offline -- validate-sv-fixture \
+  --input fixtures/truth_complex.sam \
+  --expected-json fixtures/truth_complex.expected.svs.json
+
+cargo run -p mito-cli --offline -- validate-evidence-fixture \
+  --input fixtures/truth_snp_edges.sam \
+  --expected-json fixtures/truth_snp_edges.expected.evidence.json
+
+cargo run -p mito-cli --offline -- validate-evidence-fixture \
+  --input fixtures/truth_molecule_edges.sam \
+  --expected-json fixtures/truth_molecule_edges.expected.evidence.json
+
+cargo run -p mito-cli --offline -- validate-evidence-fixture \
+  --input fixtures/truth_qc_metrics.sam \
+  --expected-json fixtures/truth_qc_metrics.expected.evidence.json
+
+cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+  --input fixtures/truth_evidence_graph.sam \
+  --expected-json fixtures/truth_evidence_graph.expected.json
+
+cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+  --input fixtures/truth_phase_evidence.sam \
+  --expected-json fixtures/truth_phase_evidence.expected.json
+
+cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+  --input fixtures/truth_circular_indel.sam \
+  --expected-json fixtures/truth_circular_indel.expected.json
+
+cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+  --input fixtures/truth_protocol_identity.sam \
+  --expected-json fixtures/truth_protocol_identity.expected.json \
+  --molecule-id-tag MI --umi-tag RX --duplex-tag DX
+
+bash scripts/verify_evidence_pages.sh
+bash scripts/verify_rc3_exports.sh
+bash scripts/verify_comparator_adapter.sh
+bash scripts/verify_phase_matrix.sh
+
+cargo run -p mito-cli --offline -- validate-clinical-fixture \
+  --input fixtures/truth_molecule_edges.sam \
+  --annotations fixtures/clinical/conflicting_assertions.tsv \
+  --expected-json fixtures/clinical/conflicting_assertions.expected.json
+
+cargo run -p mito-cli --offline -- validate-clinical-manifest \
+  --manifest fixtures/clinical/negative_manifest.json
+
+bash scripts/verify_clinical_snapshot.sh
+
+cargo run -p mito-cli --offline -- validate-error-manifest \
+  --manifest fixtures/negative/error_manifest.json
+
+cargo run -p mito-cli --offline -- validate-haplogroup-manifest \
+  --manifest fixtures/haplogroup/haplogrep3-3.3.2.expected.json
+
+bash scripts/verify_haplogroup_rules.sh
+
 bash scripts/verify_determinism.sh
 
 if command -v samtools >/dev/null 2>&1 && pkg-config --exists htslib 2>/dev/null; then
   bash scripts/build_bam_fixture.sh
+  bash scripts/verify_repeat_rotation.sh
   cargo run -p mito-cli --offline -- validate-fixture \
     --input fixtures/generated/truth_mixed.bam \
     --expected-vcf fixtures/truth_mixed.expected.vcf \
@@ -69,6 +136,31 @@ if command -v samtools >/dev/null 2>&1 && pkg-config --exists htslib 2>/dev/null
     --expected-mapq 60 \
     --expected-aux NM=1 \
     --expected-aux MD=2T7
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_phase_evidence.bam \
+    --expected-json fixtures/truth_phase_evidence.expected.json
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_phase_evidence.cram \
+    --expected-json fixtures/truth_phase_evidence.expected.json
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_phase_matrix.bam \
+    --expected-json fixtures/truth_phase_matrix.expected.json \
+    --evidence-page-size 5
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_phase_matrix.cram \
+    --expected-json fixtures/truth_phase_matrix.expected.json \
+    --evidence-page-size 5
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_protocol_identity.bam \
+    --expected-json fixtures/truth_protocol_identity.expected.json \
+    --molecule-id-tag MI --umi-tag RX --duplex-tag DX
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_protocol_identity.cram \
+    --expected-json fixtures/truth_protocol_identity.expected.json \
+    --molecule-id-tag MI --umi-tag RX --duplex-tag DX
+  cargo run -p mito-cli --offline -- validate-evidence-graph-fixture \
+    --input fixtures/generated/truth_circular_indel.bam \
+    --expected-json fixtures/truth_circular_indel.expected.json
   cargo run -p mito-cli --offline -- validate-fixture \
     --input fixtures/generated/truth_mixed.cram \
     --expected-vcf fixtures/truth_mixed.expected.vcf \
