@@ -1,0 +1,3 @@
+position	ref	alt	gene	consequence	protein	residue	structure_id	structure_chain	structure_residue	structure_complex	source	assertion_id	allele_id	disease	clinical_significance	review_status	assertion_date	source_url	references	resource_version	retrieved_at
+3	T	A					8H9S	N	1	Test structure	TEST-A	A		Disease	pathogenic					fixture	2026-01-01
+3	T	A					9I4I	N	1	Test structure	TEST-B	B		Disease	pathogenic					fixture	2026-01-01

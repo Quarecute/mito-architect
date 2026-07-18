@@ -31,8 +31,8 @@ while IFS=$'\t' read -r name version path expected_sha source license retrieved;
   checked=$((checked + 1))
 done < "$MANIFEST"
 
-if [[ "$checked" -lt 6 ]]; then
-  echo "Resource verification checked only $checked files; expected at least 6" >&2
+if [[ "$checked" -lt 7 ]]; then
+  echo "Resource verification checked only $checked files; expected at least 7" >&2
   exit 1
 fi
 

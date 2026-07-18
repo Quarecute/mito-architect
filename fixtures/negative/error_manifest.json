@@ -1,0 +1,60 @@
+{
+  "error_schema_version": "1.0",
+  "cases": [
+    {
+      "name": "FASTQ separator is malformed",
+      "input": "invalid_fastq_separator.fastq",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "primary CIGAR disagrees with query length",
+      "input": "invalid_primary_cigar.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA entry has the wrong field count",
+      "input": "invalid_sa_field_count.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA position is zero",
+      "input": "invalid_sa_position.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA strand is invalid",
+      "input": "invalid_sa_strand.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA CIGAR is invalid",
+      "input": "invalid_sa_cigar.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA MAPQ exceeds the SAM range",
+      "input": "invalid_sa_mapq.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA edit distance is non-numeric",
+      "input": "invalid_sa_edit_distance.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA entry lacks its terminal semicolon",
+      "input": "invalid_sa_unterminated.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA tag uses the wrong SAM type",
+      "input": "invalid_sa_type.sam",
+      "code": "MITO-E1103"
+    },
+    {
+      "name": "SA tag is empty",
+      "input": "invalid_sa_empty.sam",
+      "code": "MITO-E1103"
+    }
+  ]
+}

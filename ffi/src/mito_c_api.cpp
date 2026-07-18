@@ -19,13 +19,13 @@ void clear_error() {
   g_last_error_code.clear();
 }
 
-void set_error(const char* code, const char* message) {
+void set_error(const char *code, const char *message) {
   g_last_error_code = code == nullptr ? "MITO-E9001" : code;
   g_last_error = message == nullptr ? "unknown error" : message;
 }
 
-[[nodiscard]] const char* copy_to_c_string(const std::string& value) {
-  auto* result = static_cast<char*>(std::malloc(value.size() + 1U));
+[[nodiscard]] const char *copy_to_c_string(const std::string &value) {
+  auto *result = static_cast<char *>(std::malloc(value.size() + 1U));
   if (result == nullptr) {
     set_error("MITO-E1601", "malloc failed while returning analysis JSON");
     return nullptr;
@@ -36,13 +36,13 @@ void set_error(const char* code, const char* message) {
 
 } // namespace
 
-extern "C" void* mito_engine_new(void) {
+extern "C" void *mito_engine_new(void) {
   try {
     clear_error();
     return new mito::AnalysisEngine();
-  } catch (const std::bad_alloc&) {
+  } catch (const std::bad_alloc &) {
     set_error("MITO-E1601", "allocation failed while creating mito engine");
-  } catch (const std::exception& error) {
+  } catch (const std::exception &error) {
     set_error("MITO-E9001", error.what());
   } catch (...) {
     set_error("MITO-E9001", "unknown error while creating mito engine");
@@ -50,8 +50,8 @@ extern "C" void* mito_engine_new(void) {
   return nullptr;
 }
 
-extern "C" void mito_engine_delete(void* engine) {
-  delete static_cast<mito::AnalysisEngine*>(engine);
+extern "C" void mito_engine_delete(void *engine) {
+  delete static_cast<mito::AnalysisEngine *>(engine);
 }
 
 extern "C" bool mito_engine_has_htslib(void) {
@@ -62,72 +62,105 @@ extern "C" bool mito_engine_has_htslib(void) {
 #endif
 }
 
-extern "C" const char* mito_engine_version(void) {
+extern "C" const char *mito_engine_version(void) {
   return mito::kEngineVersion;
 }
 
-extern "C" const char* mito_engine_schema_version(void) {
+extern "C" const char *mito_engine_schema_version(void) {
   return mito::kResultSchemaVersion;
 }
 
-extern "C" const char* mito_engine_error_schema_version(void) {
+extern "C" const char *mito_engine_error_schema_version(void) {
   return mito::kErrorSchemaVersion;
 }
 
-extern "C" const char* mito_engine_analyze(void* engine,
-                                           const char* input_path,
-                                           const char* ref_path) {
-  return mito_engine_analyze_with_options(engine, input_path, ref_path, true, 1);
+extern "C" const char *mito_engine_analyze(void *engine, const char *input_path,
+                                           const char *ref_path) {
+  return mito_engine_analyze_with_options(engine, input_path, ref_path, true,
+                                          1);
 }
 
-extern "C" const char* mito_engine_analyze_with_options(void* engine,
-                                                        const char* input_path,
-                                                        const char* ref_path,
+extern "C" const char *mito_engine_analyze_with_options(void *engine,
+                                                        const char *input_path,
+                                                        const char *ref_path,
                                                         bool filter_numt,
                                                         std::size_t threads) {
-  return mito_engine_analyze_with_cancel(engine, input_path, ref_path, filter_numt, threads,
-                                         nullptr, nullptr);
+  return mito_engine_analyze_with_cancel(
+      engine, input_path, ref_path, filter_numt, threads, nullptr, nullptr);
 }
 
-extern "C" const char* mito_engine_analyze_with_cancel(void* engine,
-                                                       const char* input_path,
-                                                       const char* ref_path,
-                                                       bool filter_numt,
-                                                       std::size_t threads,
-                                                       bool (*should_cancel)(void*),
-                                                       void* cancel_user_data) {
-  return mito_engine_analyze_with_config(engine, input_path, ref_path, filter_numt, threads, 20, 10,
-                                         0xF00, should_cancel, cancel_user_data);
+extern "C" const char *mito_engine_analyze_with_cancel(
+    void *engine, const char *input_path, const char *ref_path,
+    bool filter_numt, std::size_t threads, bool (*should_cancel)(void *),
+    void *cancel_user_data) {
+  return mito_engine_analyze_with_config(engine, input_path, ref_path,
+                                         filter_numt, threads, 20, 10, 0xF00,
+                                         should_cancel, cancel_user_data);
 }
 
-extern "C" const char* mito_engine_analyze_with_config(void* engine,
-                                                        const char* input_path,
-                                                        const char* ref_path,
-                                                        bool filter_numt,
-                                                        std::size_t threads,
-                                                        unsigned char min_mapping_quality,
-                                                        unsigned char min_base_quality,
-                                                        unsigned short excluded_snp_flags,
-                                                        bool (*should_cancel)(void*),
-                                                        void* cancel_user_data) {
+extern "C" const char *mito_engine_analyze_with_config(
+    void *engine, const char *input_path, const char *ref_path,
+    bool filter_numt, std::size_t threads, unsigned char min_mapping_quality,
+    unsigned char min_base_quality, unsigned short excluded_snp_flags,
+    bool (*should_cancel)(void *), void *cancel_user_data) {
   return mito_engine_analyze_with_config_v2(
-      engine, input_path, ref_path, filter_numt, threads, min_mapping_quality, min_base_quality,
-      excluded_snp_flags, 0.30, false, should_cancel, cancel_user_data);
+      engine, input_path, ref_path, filter_numt, threads, min_mapping_quality,
+      min_base_quality, excluded_snp_flags, 0.30, false, should_cancel,
+      cancel_user_data);
 }
 
-extern "C" const char* mito_engine_analyze_with_config_v2(
-    void* engine,
-    const char* input_path,
-    const char* ref_path,
-    bool filter_numt,
-    std::size_t threads,
-    unsigned char min_mapping_quality,
-    unsigned char min_base_quality,
-    unsigned short excluded_snp_flags,
-    double numt_threshold,
-    bool allow_development_tags,
-    bool (*should_cancel)(void*),
-    void* cancel_user_data) {
+extern "C" const char *mito_engine_analyze_with_config_v2(
+    void *engine, const char *input_path, const char *ref_path,
+    bool filter_numt, std::size_t threads, unsigned char min_mapping_quality,
+    unsigned char min_base_quality, unsigned short excluded_snp_flags,
+    double numt_threshold, bool allow_development_tags,
+    bool (*should_cancel)(void *), void *cancel_user_data) {
+  return mito_engine_analyze_with_config_v3(
+      engine, input_path, ref_path, filter_numt, threads, min_mapping_quality,
+      min_base_quality, excluded_snp_flags, numt_threshold,
+      allow_development_tags, false, 5'000'000U, should_cancel,
+      cancel_user_data);
+}
+
+extern "C" const char *mito_engine_analyze_with_config_v3(
+    void *engine, const char *input_path, const char *ref_path,
+    bool filter_numt, std::size_t threads, unsigned char min_mapping_quality,
+    unsigned char min_base_quality, unsigned short excluded_snp_flags,
+    double numt_threshold, bool allow_development_tags,
+    bool emit_evidence_graph, std::size_t max_evidence_observations,
+    bool (*should_cancel)(void *), void *cancel_user_data) {
+  return mito_engine_analyze_with_config_v4(
+      engine, input_path, ref_path, filter_numt, threads, min_mapping_quality,
+      min_base_quality, excluded_snp_flags, numt_threshold,
+      allow_development_tags, emit_evidence_graph, max_evidence_observations,
+      1'000'000U, should_cancel, cancel_user_data);
+}
+
+extern "C" const char *mito_engine_analyze_with_config_v4(
+    void *engine, const char *input_path, const char *ref_path,
+    bool filter_numt, std::size_t threads, unsigned char min_mapping_quality,
+    unsigned char min_base_quality, unsigned short excluded_snp_flags,
+    double numt_threshold, bool allow_development_tags,
+    bool emit_evidence_graph, std::size_t max_evidence_observations,
+    std::size_t max_phase_links, bool (*should_cancel)(void *),
+    void *cancel_user_data) {
+  return mito_engine_analyze_with_config_v5(
+      engine, input_path, ref_path, filter_numt, threads, min_mapping_quality,
+      min_base_quality, excluded_snp_flags, numt_threshold,
+      allow_development_tags, emit_evidence_graph, max_evidence_observations,
+      max_phase_links, 4096U, nullptr, nullptr, nullptr, should_cancel,
+      cancel_user_data);
+}
+
+extern "C" const char *mito_engine_analyze_with_config_v5(
+    void *engine, const char *input_path, const char *ref_path,
+    bool filter_numt, std::size_t threads, unsigned char min_mapping_quality,
+    unsigned char min_base_quality, unsigned short excluded_snp_flags,
+    double numt_threshold, bool allow_development_tags,
+    bool emit_evidence_graph, std::size_t max_evidence_observations,
+    std::size_t max_phase_links, std::size_t evidence_page_size,
+    const char *molecule_id_tag, const char *umi_tag, const char *duplex_tag,
+    bool (*should_cancel)(void *), void *cancel_user_data) {
   if (engine == nullptr) {
     set_error("MITO-E1001", "mito_engine_analyze received a null engine");
     return nullptr;
@@ -147,22 +180,34 @@ extern "C" const char* mito_engine_analyze_with_config_v2(
     config.excluded_snp_flags = excluded_snp_flags;
     config.numt_threshold = numt_threshold;
     config.allow_development_tags = allow_development_tags;
+    config.result_schema = emit_evidence_graph ? mito::ResultSchema::v0_6
+                                               : mito::ResultSchema::v0_5;
+    config.max_evidence_observations = max_evidence_observations;
+    config.max_phase_links = max_phase_links;
+    config.evidence_page_size = evidence_page_size;
+    config.molecule_id_tag = molecule_id_tag == nullptr
+                                 ? std::string{}
+                                 : std::string(molecule_id_tag);
+    config.umi_tag = umi_tag == nullptr ? std::string{} : std::string(umi_tag);
+    config.duplex_tag =
+        duplex_tag == nullptr ? std::string{} : std::string(duplex_tag);
     if (should_cancel != nullptr) {
       config.should_cancel = [should_cancel, cancel_user_data] {
         return should_cancel(cancel_user_data);
       };
     }
-    const std::string reference_path = ref_path == nullptr ? std::string{} : std::string(ref_path);
-    const auto json =
-        static_cast<mito::AnalysisEngine*>(engine)->analyze(input_path, reference_path, config);
+    const std::string reference_path =
+        ref_path == nullptr ? std::string{} : std::string(ref_path);
+    const auto json = static_cast<mito::AnalysisEngine *>(engine)->analyze(
+        input_path, reference_path, config);
     return copy_to_c_string(json);
-  } catch (const mito::AnalysisError& error) {
+  } catch (const mito::AnalysisError &error) {
     const auto code = mito::analysis_error_code_name(error.code());
     g_last_error_code.assign(code.data(), code.size());
     g_last_error = error.what();
-  } catch (const std::bad_alloc&) {
+  } catch (const std::bad_alloc &) {
     set_error("MITO-E1601", "allocation failed during mtDNA analysis");
-  } catch (const std::exception& error) {
+  } catch (const std::exception &error) {
     set_error("MITO-E9001", error.what());
   } catch (...) {
     set_error("MITO-E9001", "unknown error during mtDNA analysis");
@@ -170,14 +215,14 @@ extern "C" const char* mito_engine_analyze_with_config_v2(
   return nullptr;
 }
 
-extern "C" const char* mito_engine_get_last_error(void) {
+extern "C" const char *mito_engine_get_last_error(void) {
   return g_last_error.c_str();
 }
 
-extern "C" const char* mito_engine_get_last_error_code(void) {
+extern "C" const char *mito_engine_get_last_error_code(void) {
   return g_last_error_code.empty() ? "MITO-E9001" : g_last_error_code.c_str();
 }
 
-extern "C" void mito_engine_free_string(const char* value) {
-  std::free(const_cast<char*>(value));
+extern "C" void mito_engine_free_string(const char *value) {
+  std::free(const_cast<char *>(value));
 }

@@ -10,6 +10,9 @@ interface MitoState {
   activeLayers: LayerMap;
   selectedCluster?: number;
   selectedSvId?: string;
+  selectedEventId?: string;
+  selectedMoleculeId?: string;
+  selectedPhaseId?: string;
   geneQuery: string;
   minQuality: number;
   setSelectedFile: (file?: File) => void;
@@ -18,6 +21,9 @@ interface MitoState {
   setLayer: (layer: LayerName, active: boolean) => void;
   setSelectedCluster: (clusterId?: number) => void;
   setSelectedSvId: (svId?: string) => void;
+  setSelectedEventId: (eventId?: string) => void;
+  setSelectedMoleculeId: (moleculeId?: string) => void;
+  setSelectedPhaseId: (phaseId?: string) => void;
   setGeneQuery: (query: string) => void;
   setMinQuality: (quality: number) => void;
 }
@@ -34,7 +40,7 @@ export const useMitoStore = create<MitoState>((set) => ({
   minQuality: 0,
   setSelectedFile: (selectedFile) => set({ selectedFile }),
   setJobId: (jobId) => set({ jobId }),
-  setData: (data) => set({ data }),
+  setData: (data) => set({ data, selectedEventId: undefined, selectedMoleculeId: undefined, selectedPhaseId: undefined }),
   setLayer: (layer, active) =>
     set((state) => ({
       activeLayers: {
@@ -44,6 +50,9 @@ export const useMitoStore = create<MitoState>((set) => ({
     })),
   setSelectedCluster: (selectedCluster) => set({ selectedCluster }),
   setSelectedSvId: (selectedSvId) => set({ selectedSvId }),
+  setSelectedEventId: (selectedEventId) => set({ selectedEventId }),
+  setSelectedMoleculeId: (selectedMoleculeId) => set({ selectedMoleculeId }),
+  setSelectedPhaseId: (selectedPhaseId) => set({ selectedPhaseId }),
   setGeneQuery: (geneQuery) => set({ geneQuery }),
   setMinQuality: (minQuality) => set({ minQuality })
 }));

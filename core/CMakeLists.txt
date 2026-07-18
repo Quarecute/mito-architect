@@ -23,6 +23,7 @@ target_compile_definitions(mito_core
     MITO_CLINICAL_ANNOTATIONS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/clinical_annotations.tsv"
     MITO_PHYLOTREE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/phylotree-rcrs-17.3.xml"
     MITO_PHYLOTREE_WEIGHTS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/phylotree-rcrs-17.3-weights.txt"
+    MITO_PHYLOTREE_ALIGNMENT_RULES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/phylotree-rcrs-17.3-rules.csv"
     MITO_RESOURCE_MANIFEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/resource_manifest.tsv"
 )
 target_link_libraries(mito_core PUBLIC Threads::Threads)
@@ -66,6 +67,7 @@ install(FILES
   data/clinical_annotations.tsv
   data/phylotree-rcrs-17.3.xml
   data/phylotree-rcrs-17.3-weights.txt
+  data/phylotree-rcrs-17.3-rules.csv
   data/phylotree-rcrs-17.3.LICENSE
   data/resource_manifest.tsv
   DESTINATION share/mito-architect/reference

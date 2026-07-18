@@ -1,0 +1,2 @@
+position	ref	alt	gene	consequence	protein	residue	structure_id	structure_chain	structure_residue	structure_complex	source	assertion_id	allele_id	disease	clinical_significance	review_status	assertion_date	source_url	references	resource_version	retrieved_at
+0	T	A									TEST	A		Disease	pathogenic					fixture	2026-01-01

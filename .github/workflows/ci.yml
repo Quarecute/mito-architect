@@ -16,7 +16,7 @@ jobs:
           sudo apt-get install -y cmake g++ libhts-dev nodejs npm pkg-config
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.80.0
+        uses: dtolnay/rust-toolchain@1.85.0
 
       - name: Configure C++
         run: cmake -S . -B build -DMITO_BUILD_TESTS=ON

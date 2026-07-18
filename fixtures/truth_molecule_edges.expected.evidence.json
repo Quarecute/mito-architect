@@ -1,0 +1,135 @@
+{
+  "input_alignment_records": 9,
+  "input_molecules": 9,
+  "numt_filtered_reads": 0,
+  "passed_reads": 9,
+  "reads": [
+    {
+      "flags": 0,
+      "id": "alt",
+      "mapping_quality": 60,
+      "snps": [
+        {
+          "alt": "A",
+          "position": 3,
+          "ref": "T"
+        }
+      ]
+    },
+    {
+      "flags": 0,
+      "id": "conflict",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 1024,
+      "id": "duplicate",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 0,
+      "id": "missing-quality",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 512,
+      "id": "qc-fail",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 0,
+      "id": "reference",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 16,
+      "id": "reverse",
+      "mapping_quality": 60,
+      "snps": [
+        {
+          "alt": "A",
+          "position": 3,
+          "ref": "T"
+        }
+      ]
+    },
+    {
+      "flags": 256,
+      "id": "secondary",
+      "mapping_quality": 60,
+      "snps": []
+    },
+    {
+      "flags": 2048,
+      "id": "supplementary",
+      "mapping_quality": 60,
+      "snps": []
+    }
+  ],
+  "schema_version": "0.5",
+  "variants": [
+    {
+      "allele_quality": {
+        "alternate": {
+          "count": 2,
+          "max_phred": 40,
+          "mean_phred": 40.0,
+          "min_phred": 40
+        },
+        "other": {
+          "count": 0,
+          "max_phred": null,
+          "mean_phred": null,
+          "min_phred": null
+        },
+        "reference": {
+          "count": 1,
+          "max_phred": 40,
+          "mean_phred": 40.0,
+          "min_phred": 40
+        }
+      },
+      "alt": "A",
+      "alt_depth": 2,
+      "callable_depth": 3,
+      "ci95_high": 0.938508055,
+      "ci95_low": 0.207659601,
+      "heteroplasmy": 0.666666667,
+      "molecule_support": {
+        "alternate": 2,
+        "callable": 3,
+        "other": 0,
+        "reference": 1
+      },
+      "other_depth": 0,
+      "position": 3,
+      "read_position": {
+        "alternate_mean": 0.0,
+        "bias_delta": 0.0,
+        "definition": "normalized_center_proximity",
+        "other_mean": null,
+        "reference_mean": 0.0
+      },
+      "ref": "T",
+      "ref_depth": 1,
+      "strand_bias_delta": 0.5,
+      "strand_support": {
+        "alt_forward": 1,
+        "alt_reverse": 1,
+        "other_forward": 0,
+        "other_reverse": 0,
+        "ref_forward": 1,
+        "ref_reverse": 0
+      },
+      "supporting_reads": [
+        "alt",
+        "reverse"
+      ]
+    }
+  ]
+}

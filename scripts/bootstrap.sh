@@ -63,7 +63,7 @@ install_arch() {
     aur_args+=(--noconfirm)
   fi
 
-  local official=(base-devel cmake ninja pkgconf nodejs npm curl gzip jq ca-certificates)
+  local official=(base-devel cmake ninja pkgconf nodejs npm curl gzip jq git ripgrep ca-certificates)
   if ! command -v cargo >/dev/null 2>&1 || ! command -v rustc >/dev/null 2>&1; then
     official+=(rust)
   fi
@@ -94,7 +94,7 @@ install_debian() {
   fi
   local packages=(
     build-essential ca-certificates cmake ninja-build pkg-config libhts-dev
-    samtools minimap2 bcftools sra-toolkit nodejs npm rustc cargo curl gzip jq
+    samtools minimap2 bcftools tabix sra-toolkit nodejs npm rustc cargo curl gzip jq git ripgrep
   )
   if [[ "$INCLUDE_DOCKER" -eq 1 ]]; then
     packages+=(docker.io docker-compose-plugin)
@@ -160,12 +160,17 @@ audit_dependencies() {
     "samtools:BAM/CRAM workflow"
     "minimap2:competitive long-read mapping"
     "bcftools:VCF interoperability"
+    "bgzip:deterministic compressed VCF export"
+    "tabix:VCF coordinate indexing"
     "prefetch:bounded public fixture retrieval"
     "fasterq-dump:public FASTQ conversion"
     "curl:resource retrieval"
     "gzip:compressed clinical resources"
     "jq:deterministic verification support"
+    "rg:fail-closed fixture verification"
+    "git:release evidence identity"
     "sha256sum:resource integrity verification"
+    "stat:release evidence metadata"
   )
   if [[ "$INCLUDE_DOCKER" -eq 1 ]]; then
     commands+=("docker:container build/deployment")

@@ -7,6 +7,7 @@ import ClusterMutationPanel from '../components/ClusterMutationPanel';
 import CircosWrapper from '../components/CircosWrapper';
 import ExportButtons from '../components/ExportButtons';
 import Sidebar from '../components/Sidebar';
+import VariantEvidenceTable from '../components/VariantEvidenceTable';
 import VariantTable from '../components/VariantTable';
 import { getResult } from '../lib/api';
 import { demoData } from '../lib/demoData';
@@ -78,11 +79,13 @@ export default function ResultPage() {
         <ExportButtons jobId={jobId} jsonData={data} htmlAvailable={!isDemo} />
       </section>
 
-      <section className="grid gap-3 md:grid-cols-4">
-        <Metric icon={<Dna className="h-4 w-4" />} label="Passed reads" value={data.filter_stats.passed_reads} />
-        <Metric icon={<Filter className="h-4 w-4" />} label="NUMT filtered" value={data.filter_stats.numt_filtered_reads} />
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+        <Metric icon={<Dna className="h-4 w-4" />} label="Evidence molecules" value={data.filter_stats.evidence_eligible_molecules ?? data.filter_stats.passed_reads} />
+        <Metric icon={<Gauge className="h-4 w-4" />} label="Mean callable" value={formatMetricPercent(meanCallableFraction(data))} />
+        <Metric icon={<Filter className="h-4 w-4" />} label="Variants" value={data.variants?.length ?? 0} />
         <Metric icon={<Activity className="h-4 w-4" />} label="SVs" value={data.svs.length} />
-        <Metric icon={<Gauge className="h-4 w-4" />} label="Clusters" value={data.clusters.length} />
+        <Metric icon={<Activity className="h-4 w-4" />} label="Phase links" value={data.phase_links?.length ?? 0} />
+        <Metric icon={<Gauge className="h-4 w-4" />} label="Candidate architectures" value={data.architectures?.length ?? 0} />
       </section>
 
       {data.filter_stats.numt_assessment && !data.filter_stats.numt_assessment.specificity_assessable && (
@@ -126,13 +129,14 @@ export default function ResultPage() {
       </div>
 
       <ClusterMutationPanel data={data} />
-      <AnalysisModulesPanel data={data} />
+      <VariantEvidenceTable data={data} />
+      <AnalysisModulesPanel data={data} jobId={isDemo ? undefined : jobId} />
       <VariantTable data={data} />
     </main>
   );
 }
 
-function Metric({ icon, label, value }: { icon: JSX.Element; label: string; value: number }) {
+function Metric({ icon, label, value }: { icon: JSX.Element; label: string; value: number | string }) {
   return (
     <div className="glass-panel rounded-lg border border-line p-4 shadow-tool">
       <div className="flex items-center gap-2 text-sm text-muted">
@@ -142,6 +146,16 @@ function Metric({ icon, label, value }: { icon: JSX.Element; label: string; valu
       <div className="mt-2 text-3xl font-semibold tracking-normal">{value}</div>
     </div>
   );
+}
+
+function meanCallableFraction(data: typeof demoData): number | null {
+  const known = (data.callability ?? []).filter((item) => item.known);
+  if (known.length === 0) return null;
+  return known.reduce((sum, item) => sum + item.callable_fraction, 0) / known.length;
+}
+
+function formatMetricPercent(value: number | null): string {
+  return value === null ? 'not assessable' : `${(value * 100).toFixed(1)}%`;
 }
 
 function ResultSkeleton() {

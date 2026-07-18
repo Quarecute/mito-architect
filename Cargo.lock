@@ -501,7 +501,7 @@ dependencies = [
 
 [[package]]
 name = "mito-cli"
-version = "0.4.1"
+version = "0.5.0-dev"
 dependencies = [
  "anyhow",
  "clap",
@@ -512,14 +512,14 @@ dependencies = [
 
 [[package]]
 name = "mito-ffi"
-version = "0.4.1"
+version = "0.5.0-dev"
 dependencies = [
  "cmake",
 ]
 
 [[package]]
 name = "mito-server"
-version = "0.4.1"
+version = "0.5.0-dev"
 dependencies = [
  "anyhow",
  "axum",
@@ -528,6 +528,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tower",
  "tower-http",
  "uuid",
 ]
