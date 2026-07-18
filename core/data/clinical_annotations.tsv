@@ -1,4 +1,7 @@
-position	ref	alt	gene	consequence	protein	residue	phenotype	pathogenicity	references	sources	structure_id	structure_chain	structure_residue	structure_complex
-3243	A	G	MT-TL1	tRNA_variant			MELAS; MIDD	pathogenic	PMID:2106746; PMID:8358449	MITOMAP;ClinVar				
-8993	T	G	MT-ATP6	missense_variant	MT-ATP6	p.Leu156Arg	NARP; Leigh syndrome	pathogenic	PMID:1839049; PMID:1737708	MITOMAP;ClinVar	AF-Q00360-F1	A	156	Complex V ATP synthase
-11778	G	A	MT-ND4	missense_variant	MT-ND4	p.Arg340His	Leber hereditary optic neuropathy	pathogenic	PMID:3413054; PMID:1679310	MITOMAP;ClinVar	AF-P03905-F1	A	340	Complex I NADH dehydrogenase
+position	ref	alt	gene	consequence	protein	residue	structure_id	structure_chain	structure_residue	structure_complex	source	assertion_id	allele_id	disease	clinical_significance	review_status	assertion_date	source_url	references	resource_version	retrieved_at
+3243	A	G	MT-TL1	tRNA_variant							MITOMAP			MELAS; MIDD	pathogenic	not_provided			PMID:2106746; PMID:8358449	curated-subset-2026-07-16	2026-07-16
+3243	A	G	MT-TL1	tRNA_variant							ClinVar			MELAS; MIDD	pathogenic	not_provided			PMID:2106746; PMID:8358449	curated-subset-2026-07-16	2026-07-16
+8993	T	G	MT-ATP6	missense_variant	MT-ATP6	p.Leu156Arg	8H9S	N	156	Complex V ATP synthase	MITOMAP			NARP; Leigh syndrome	pathogenic	not_provided			PMID:1839049; PMID:1737708	curated-subset-2026-07-16	2026-07-16
+8993	T	G	MT-ATP6	missense_variant	MT-ATP6	p.Leu156Arg	8H9S	N	156	Complex V ATP synthase	ClinVar			NARP; Leigh syndrome	pathogenic	not_provided			PMID:1839049; PMID:1737708	curated-subset-2026-07-16	2026-07-16
+11778	G	A	MT-ND4	missense_variant	MT-ND4	p.Arg340His	9I4I	r	340	Complex I NADH dehydrogenase	MITOMAP			Leber hereditary optic neuropathy	pathogenic	not_provided			PMID:3413054; PMID:1679310	curated-subset-2026-07-16	2026-07-16
+11778	G	A	MT-ND4	missense_variant	MT-ND4	p.Arg340His	9I4I	r	340	Complex I NADH dehydrogenase	ClinVar			Leber hereditary optic neuropathy	pathogenic	not_provided			PMID:3413054; PMID:1679310	curated-subset-2026-07-16	2026-07-16

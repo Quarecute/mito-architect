@@ -1,0 +1,7 @@
+ID	Filter	Pos	Ref	Variant	VariantLevel	MajorBase	MajorLevel	MinorBase	MinorLevel	Coverage	CoverageFWD	CoverageREV	Type	Mutation
+truth_phase_evidence	PASS	3	T	A	0.857142857	A	0.857142857	T	0.142857143	7	4	3	2	3A
+truth_phase_evidence	PASS	5	A	G	0.166666667	A	0.833333333	G	0.166666667	6	3	3	2	5G
+truth_phase_evidence	PASS	5	CA	C	0.166666667	C	0.833333333	CA	0.166666667	6	3	3	2	5delA
+truth_phase_evidence	PASS	5	A	AG	0.200000000	A	0.800000000	AG	0.200000000	5	3	2	2	5.1G
+truth_phase_evidence	PASS	5	A	AT	0.200000000	A	0.800000000	AT	0.200000000	5	2	3	2	5.1T
+truth_phase_evidence	STRAND_BIAS	7	A	G	0.100000000	A	0.900000000	G	0.100000000	10	5	5	2	7G

@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "input_alignment_records": 2,
+  "input_molecules": 2,
+  "passed_reads": 2,
+  "numt_filtered_reads": 0,
+  "svs": [
+    {
+      "id": "deletion:110-299",
+      "type": "deletion",
+      "start": 110,
+      "end": 299,
+      "length": 190,
+      "known_event": false,
+      "evidence_source": "split_alignment",
+      "evidence_sources": ["split_alignment"],
+      "segment_count": 3,
+      "orientation": "mixed",
+      "orientations": ["+/+", "-/-"],
+      "supporting_reads": ["complex-forward", "complex-reverse"]
+    },
+    {
+      "id": "deletion:310-599",
+      "type": "deletion",
+      "start": 310,
+      "end": 599,
+      "length": 290,
+      "known_event": false,
+      "evidence_source": "split_alignment",
+      "evidence_sources": ["split_alignment"],
+      "segment_count": 3,
+      "orientation": "mixed",
+      "orientations": ["+/+", "-/-"],
+      "supporting_reads": ["complex-forward", "complex-reverse"]
+    }
+  ],
+  "complex_events": [
+    {
+      "id": "complex:deletion:110-299@+/+|deletion:310-599@+/+",
+      "junction_count": 2,
+      "segment_count": 3,
+      "canonicalization": "strand_invariant_path",
+      "junction_ids": ["deletion:110-299", "deletion:310-599"],
+      "junction_orientations": ["+/+", "+/+"],
+      "supporting_reads": ["complex-forward", "complex-reverse"]
+    }
+  ]
+}

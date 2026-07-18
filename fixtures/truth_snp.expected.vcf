@@ -1,11 +1,15 @@
 ##fileformat=VCFv4.3
 ##source=MitoArchitect
+##contig=<ID=NC_012920.1,length=16569>
 ##INFO=<ID=AC,Number=A,Type=Integer,Description="Alternate read support">
-##INFO=<ID=DP,Number=1,Type=Integer,Description="Passed read count used as denominator">
-##INFO=<ID=HF,Number=A,Type=Float,Description="Heteroplasmy fraction estimated from read support / passed reads">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Locus-callable A/C/G/T molecule depth after quality filters">
+##INFO=<ID=HF,Number=A,Type=Float,Description="Heteroplasmy fraction estimated from alternate depth / locus-callable depth">
+##INFO=<ID=HF_CI95,Number=2,Type=Float,Description="Wilson 95% confidence interval for heteroplasmy fraction">
 ##INFO=<ID=GENE,Number=1,Type=String,Description="Annotated mitochondrial gene">
-##INFO=<ID=CLNSIG,Number=1,Type=String,Description="Clinical significance from local annotation cache">
+##INFO=<ID=CLNSIG,Number=1,Type=String,Description="Deterministic clinical significance summary; inspect source assertions before interpretation">
+##INFO=<ID=CLNCONFLICT,Number=0,Type=Flag,Description="Source assertions contain incompatible or explicitly conflicting significance groups">
+##INFO=<ID=CLNSRC,Number=.,Type=String,Description="Clinical assertion sources preserved in the JSON result">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype placeholder for haploid mtDNA export">
 ##FORMAT=<ID=HF,Number=1,Type=Float,Description="Heteroplasmy fraction">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	truth_snp
-NC_012920.1	3243	.	A	G	.	PASS	AC=2;DP=3;HF=0.666667;GENE=MT-TL1;CLNSIG=pathogenic	GT:HF	0/1:0.666667
+NC_012920.1	3243	.	A	G	.	PASS	AC=2;DP=3;HF=0.666667;GENE=MT-TL1;CLNSIG=pathogenic;CLNSRC=ClinVar,MITOMAP;HF_CI95=0.207660,0.938508	GT:HF	0/1:0.666667

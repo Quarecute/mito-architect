@@ -84,7 +84,7 @@ function Row({ index, style, data }: ListChildComponentProps<ReadFeature[]>) {
       className={`grid ${TABLE_GRID} items-center gap-2 border-b border-line px-4 text-sm`}
     >
       <div className="truncate font-medium">{read.id}</div>
-      <div className="text-center">H{read.cluster_id + 1}</div>
+      <div className="text-center">{read.cluster_id < 0 ? 'Outlier' : `C${read.cluster_id + 1}`}</div>
       <div className="text-right tabular-nums">{read.mean_quality.toFixed(1)}</div>
       <div className="text-right tabular-nums">{read.length}</div>
       <div className="truncate text-muted">

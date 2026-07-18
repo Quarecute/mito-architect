@@ -27,6 +27,9 @@ visualization-lib/dist/
 .deps/
 .local/
 tmp/
+.data/
+fixtures/generated/
+/core/data/rcrs.fasta.fai
 
 # Generated reports and local runtime files
 output.html
@@ -35,6 +38,34 @@ mito-*.html
 *.log
 .env
 .env.*
+!.env.example
+
+# Coverage, profiling, sanitizer, and crash artifacts
+coverage/
+coverage-*/
+*.gcda
+*.gcno
+*.gcov
+*.lcov
+*.profraw
+*.profdata
+gmon.out
+vgcore.*
+*.core
+core.[0-9]*
+
+# Tool caches and transient files
+.cache/
+.pytest_cache/
+.nyc_output/
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+*~
 
 # Editor/OS noise
 .DS_Store

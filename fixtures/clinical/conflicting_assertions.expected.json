@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "variants": [
+    {
+      "position": 3,
+      "ref": "T",
+      "alt": "A",
+      "annotation": {
+        "schema_version": "1.0",
+        "conflict_status": "conflicting",
+        "consensus_significance": "conflicting",
+        "pathogenicity": "conflicting",
+        "phenotype": "Disease A; Disease B",
+        "references": ["TEST:1", "TEST:2"],
+        "sources": ["TEST-A", "TEST-B"],
+        "source": "local-cache",
+        "assertions": [
+          {
+            "source": "TEST-A",
+            "assertion_id": "A-1",
+            "allele_id": "ALLELE-A",
+            "disease": "Disease A",
+            "clinical_significance": "Pathogenic",
+            "normalized_significance": "pathogenic",
+            "review_status": "criteria_provided_single_submitter",
+            "assertion_date": "2026-01-10",
+            "source_url": "https://example.invalid/a",
+            "references": ["TEST:1"],
+            "resource_version": "fixture-a-1",
+            "retrieved_at": "2026-01-11"
+          },
+          {
+            "source": "TEST-B",
+            "assertion_id": "B-9",
+            "allele_id": "ALLELE-B",
+            "disease": "Disease B",
+            "clinical_significance": "Benign",
+            "normalized_significance": "benign",
+            "review_status": "expert_panel",
+            "assertion_date": "2026-02-10",
+            "source_url": "https://example.invalid/b",
+            "references": ["TEST:2"],
+            "resource_version": "fixture-b-4",
+            "retrieved_at": "2026-02-11"
+          }
+        ]
+      }
+    }
+  ]
+}

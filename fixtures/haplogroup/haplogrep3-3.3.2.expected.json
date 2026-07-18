@@ -1,0 +1,281 @@
+{
+  "schema_version": "1.0",
+  "reference": {
+    "tool": "HaploGrep 3",
+    "version": "3.3.2",
+    "release_url": "https://github.com/genepi/haplogrep3/releases/tag/v3.3.2",
+    "asset": "haplogrep3-3.3.2-linux.tar.gz",
+    "asset_sha256": "957165143ddd7d6ad9f34cc3af56b784fc236081e031c99bea4a574d6ad70959",
+    "tree": "phylotree-rcrs@17.3",
+    "tree_sha256": "5490d3756503654001d07ed3a733bcfa8ee9ee225c50cd07c8c4260d239d85b1",
+    "weights_sha256": "d0962699365c7fe6f0b41f7c1793513fa950597c971c859beeb7dc0e3f8ab92a",
+    "alignment_rules": "trees/phylotree-rcrs/17.3/rules.csv",
+    "alignment_rules_sha256": "0a4834cdbc780b810e406b570a88597868d60e854bd38146930455518f35d43b",
+    "metric": "Kulczynski",
+    "command": "haplogrep3 classify --in haplogrep3-3.3.2.hsd --out <report> --tree phylotree-rcrs@17.3 --metric KULCZYNSKI --extend-report --hits 3",
+    "source_hsd": "haplogrep3-3.3.2.hsd",
+    "source_hsd_sha256": "e68ac57d7e70265678c54520a57b8ef2902683f2158ba178a6f7d7c93db50d8b"
+  },
+  "coverage": {
+    "differential_profiles": 28,
+    "alignment_projection_cases": 5,
+    "compound_rule_cases": 3,
+    "backmutation_cases": 3,
+    "lineage_groups": [
+      "A", "B", "C", "D", "F", "G", "H", "HV", "I", "J", "K",
+      "L0", "L1", "L2", "L3", "L4", "M", "R", "T", "U", "V", "W", "X"
+    ]
+  },
+  "cases": [
+    {
+      "name": "HG_H2a2a1a",
+      "source_profile": "HG_H2a2a1a",
+      "lineage_group": "H",
+      "haplogrep_candidates": ["H2a2a1a", "H95a", "X2c2"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Backmutation_H2c1",
+      "source_profile": "HG_Backmutation_H2c1",
+      "lineage_group": "H",
+      "haplogrep_candidates": ["H2c1", "H2c", "H2"],
+      "haplogrep_quality": 1.0,
+      "backmutation_absent_markers": ["152C"]
+    },
+    {
+      "name": "HG_Backmutation_H1b1g",
+      "source_profile": "HG_Backmutation_H1b1g",
+      "lineage_group": "H",
+      "haplogrep_candidates": ["H1b1g", "H1b1", "H1b1+16362"],
+      "haplogrep_quality": 1.0,
+      "backmutation_absent_markers": ["1438G"]
+    },
+    {
+      "name": "HG_Backmutation_V7b",
+      "source_profile": "HG_Backmutation_V7b",
+      "lineage_group": "V",
+      "haplogrep_candidates": ["V7b", "V7", "V+@16298"],
+      "haplogrep_quality": 1.0,
+      "backmutation_absent_markers": ["16298C"]
+    },
+    {
+      "name": "HG_Africa01",
+      "source_profile": "Africa01",
+      "lineage_group": "L0",
+      "haplogrep_candidates": ["L0f", "L0f2", "L0f2a"],
+      "haplogrep_quality": 0.9012
+    },
+    {
+      "name": "HG_Africa02",
+      "source_profile": "Africa02",
+      "lineage_group": "L3",
+      "haplogrep_candidates": ["L3e2b", "L3e2b1", "L3e2b1a"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Africa03",
+      "source_profile": "Africa03",
+      "lineage_group": "L2",
+      "haplogrep_candidates": ["L2d+16129", "L2d1", "L2d1a"],
+      "haplogrep_quality": 0.9489
+    },
+    {
+      "name": "HG_Africa06",
+      "source_profile": "Africa06",
+      "lineage_group": "L3",
+      "haplogrep_candidates": ["L3b", "L3b1", "L3b1a"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Africa08",
+      "source_profile": "Africa08",
+      "lineage_group": "L3",
+      "haplogrep_candidates": ["L3e3a", "L3e3", "L3e3b"],
+      "haplogrep_quality": 1.0573
+    },
+    {
+      "name": "HG_Africa09",
+      "source_profile": "Africa09",
+      "lineage_group": "L4",
+      "haplogrep_candidates": ["L4b2a2c", "L4b2a2", "L4b2a2a"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Africa10",
+      "source_profile": "Africa10",
+      "lineage_group": "U",
+      "haplogrep_candidates": ["U6a2+195", "U6a2c", "U6a2a2"],
+      "haplogrep_quality": 0.9786
+    },
+    {
+      "name": "HG_Africa11",
+      "source_profile": "Africa11",
+      "lineage_group": "L1",
+      "haplogrep_candidates": ["L1b1a+189", "L1b1a3", "L1b1a3a"],
+      "haplogrep_quality": 0.9839
+    },
+    {
+      "name": "HG_Asia01",
+      "source_profile": "Asia01",
+      "lineage_group": "D",
+      "haplogrep_candidates": ["D4e1", "D4e1c", "D2"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Asia02",
+      "source_profile": "Asia02",
+      "lineage_group": "G",
+      "haplogrep_candidates": ["G2a1d", "G2a1d1", "G2a1d1a"],
+      "haplogrep_quality": 0.9531
+    },
+    {
+      "name": "HG_Asia03",
+      "source_profile": "Asia03",
+      "lineage_group": "B",
+      "haplogrep_candidates": ["B4h", "B4+16261", "B4i"],
+      "haplogrep_quality": 0.9398
+    },
+    {
+      "name": "HG_Asia05",
+      "source_profile": "Asia05",
+      "lineage_group": "M",
+      "haplogrep_candidates": ["M7b1a1+(16192)", "M7b1a1d", "M7b1a1d1"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Asia08",
+      "source_profile": "Asia08",
+      "lineage_group": "C",
+      "haplogrep_candidates": ["C7", "C7a", "C7a1"],
+      "haplogrep_quality": 0.964
+    },
+    {
+      "name": "HG_Asia10",
+      "source_profile": "Asia10",
+      "lineage_group": "A",
+      "haplogrep_candidates": ["A5b1b", "A", "A5"],
+      "haplogrep_quality": 0.933
+    },
+    {
+      "name": "HG_Asia11",
+      "source_profile": "Asia11",
+      "lineage_group": "F",
+      "haplogrep_candidates": ["F2", "F2c", "F2e"],
+      "haplogrep_quality": 0.9842
+    },
+    {
+      "name": "HG_Asia16",
+      "source_profile": "Asia16",
+      "lineage_group": "R",
+      "haplogrep_candidates": ["R9b1a1a", "R9b1a1", "R9b1a"],
+      "haplogrep_quality": 0.9742
+    },
+    {
+      "name": "HG_Europe02",
+      "source_profile": "Europe02",
+      "lineage_group": "U",
+      "haplogrep_candidates": ["U5a1", "U5a1b", "U5a1b2"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Europe05",
+      "source_profile": "Europe05",
+      "lineage_group": "T",
+      "haplogrep_candidates": ["T1a1'3", "T1a1", "T1a1a"],
+      "haplogrep_quality": 1.0
+    },
+    {
+      "name": "HG_Europe13",
+      "source_profile": "Europe13",
+      "lineage_group": "HV",
+      "haplogrep_candidates": ["HV0", "HV0e", "HV0+195"],
+      "haplogrep_quality": 0.9872
+    },
+    {
+      "name": "HG_Europe38",
+      "source_profile": "Europe38",
+      "lineage_group": "K",
+      "haplogrep_candidates": ["K1b1a1+199", "K1b1a1a", "K1b1a1b"],
+      "haplogrep_quality": 0.9572
+    },
+    {
+      "name": "HG_Europe42",
+      "source_profile": "Europe42",
+      "lineage_group": "J",
+      "haplogrep_candidates": ["J1", "J1c3f", "J1+16193"],
+      "haplogrep_quality": 0.9289
+    },
+    {
+      "name": "HG_Europe50",
+      "source_profile": "Europe50",
+      "lineage_group": "I",
+      "haplogrep_candidates": ["I", "I4", "I4a"],
+      "haplogrep_quality": 1.0247
+    },
+    {
+      "name": "HG_Europe55",
+      "source_profile": "Europe55",
+      "lineage_group": "X",
+      "haplogrep_candidates": ["X2b+226", "X2b2", "X2b3"],
+      "haplogrep_quality": 0.9763
+    },
+    {
+      "name": "HG_Europe57",
+      "source_profile": "Europe57",
+      "lineage_group": "W",
+      "haplogrep_candidates": ["W1c", "W1+119", "W1i"],
+      "haplogrep_quality": 0.9575
+    },
+    {
+      "name": "HG_CigarIndels3Prime",
+      "input": "truth_haplogroup_indels.sam",
+      "rule_class": "cigar_3prime",
+      "range": ["519-580"],
+      "markers": ["523d", "524d", "573.1CCCC"],
+      "normalization_rules": [
+        "516d 517d -> 523d 524d",
+        "567.1CCCC -> 573.XC"
+      ]
+    },
+    {
+      "name": "HG_CigarRotatedInsertion",
+      "input": "truth_haplogroup_rotated_indel.sam",
+      "rule_class": "cigar_3prime",
+      "range": ["8266-8295"],
+      "markers": ["8289.1CCCCCTCTA"],
+      "normalization_rules": [
+        "8270.1ACCCCCTCT -> 8289.1CCCCCTCTA"
+      ]
+    },
+    {
+      "name": "HG_CompoundRule309",
+      "input": "truth_haplogroup_rule_309.fastq",
+      "rule_class": "compound",
+      "range": ["297-317"],
+      "markers": ["309d"],
+      "normalization_rules": [
+        "309T 310C -> 309d"
+      ]
+    },
+    {
+      "name": "HG_CompoundRule188",
+      "input": "truth_haplogroup_rule_188.fastq",
+      "rule_class": "compound",
+      "range": ["185-196"],
+      "markers": ["189G", "192C", "194T", "195C", "196C"],
+      "normalization_rules": [
+        "188.1GC 193C 195d 196d -> 189G 192C 194T 195C 196C"
+      ]
+    },
+    {
+      "name": "HG_CompoundRule56ReferenceRestore",
+      "input": "truth_haplogroup_rule_56.fastq",
+      "rule_class": "compound",
+      "range": ["54-66"],
+      "markers": ["58C", "60.1T", "60.2T", "64d", "66C"],
+      "normalization_rules": [
+        "56.1TC 65d 66d -> 58C 60.1T 60.2T 64d 65(reference) 66C"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+position	ref	alt	gene	consequence	protein	residue	structure_id	structure_chain	structure_residue	structure_complex	source	assertion_id	allele_id	disease	clinical_significance	review_status	assertion_date	source_url	references	resource_version	retrieved_at
+3	T	A									TEST-A	A-1	ALLELE-A	Disease A	Pathogenic	criteria_provided_single_submitter	2026-01-10	https://example.invalid/a	TEST:1	fixture-a-1	2026-01-11
+3	T	A									TEST-B	B-9	ALLELE-B	Disease B	Benign	expert_panel	2026-02-10	https://example.invalid/b	TEST:2	fixture-b-4	2026-02-11

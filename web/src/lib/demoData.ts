@@ -2,17 +2,37 @@ import type { MitoAnalysisData } from '@mito-architect/visualization-lib';
 
 export const demoData: MitoAnalysisData = {
   metadata: {
-    schema_version: '0.2',
-    engine_version: '0.2.0',
+    schema_version: '0.5',
+    engine_version: '0.5.0-dev',
     sample: 'demo-mixed-haplogroups',
     input_path: 'fixtures/tiny.fastq',
     reference_path: 'core/data/rcrs.fasta',
     reference_accession: 'NC_012920.1',
     reference_length: 16569,
     threads: 1,
+    resources: [
+      {
+        name: 'rCRS',
+        version: 'NC_012920.1',
+        path: 'rcrs.fasta',
+        sha256: 'fc392cde8e63b4d2e3a870bb97cc0626dea33d46dfb8abdebffada040f42ec92',
+        source: 'https://www.ncbi.nlm.nih.gov/nuccore/NC_012920.1',
+        license: 'NCBI data terms',
+        retrieved: 'bundled'
+      },
+      {
+        name: 'phylotree-rcrs',
+        version: '17.3',
+        path: 'phylotree-rcrs-17.3.xml',
+        sha256: '5490d3756503654001d07ed3a733bcfa8ee9ee225c50cd07c8c4260d239d85b1',
+        source: 'https://github.com/genepi/phylotree-rcrs-17/releases/tag/17.3',
+        license: 'MIT',
+        retrieved: '2026-07-12'
+      }
+    ],
     algorithm_notes: [
       'FASTQ/SAM vertical slice',
-      'NUMT score is heuristic until htslib nuclear remapping is enabled',
+      'NUMT specificity requires competitive nuclear-plus-mitochondrial alignment',
       'Cluster IDs are deterministic feature signatures until HDBSCAN adapter is enabled'
     ]
   },
@@ -20,7 +40,14 @@ export const demoData: MitoAnalysisData = {
     input_reads: 7,
     passed_reads: 6,
     numt_filtered_reads: 1,
-    numt_threshold: 0.3
+    numt_threshold: 0.3,
+    input_alignment_records: 7,
+    input_molecules: 7,
+    numt_assessment: {
+      mode: 'unaligned_fastq',
+      nuclear_contigs_present: false,
+      specificity_assessable: false
+    }
   },
   coverage_metrics: {
     mean_depth: 13.333,
@@ -68,7 +95,7 @@ export const demoData: MitoAnalysisData = {
     {
       id: 0,
       label: 'H1',
-      haplogroup: 'H-like',
+      haplogroup: 'H',
       size: 3,
       consensus_haplotype: 'feature-consensus-0',
       reads: [
@@ -81,7 +108,7 @@ export const demoData: MitoAnalysisData = {
     {
       id: 1,
       label: 'H2',
-      haplogroup: 'J-like',
+      haplogroup: 'J',
       size: 2,
       consensus_haplotype: 'feature-consensus-1',
       reads: ['demo-hapB-001', 'demo-hapB-002'],
@@ -90,7 +117,7 @@ export const demoData: MitoAnalysisData = {
     {
       id: 2,
       label: 'H3',
-      haplogroup: 'T-like',
+      haplogroup: 'T',
       size: 1,
       consensus_haplotype: 'feature-consensus-2',
       reads: ['demo-hapC-001'],
@@ -125,8 +152,8 @@ export const demoData: MitoAnalysisData = {
             sources: ['MITOMAP', 'ClinVar']
           },
           structure: {
-            structure_id: 'AF-Q00360-F1',
-            chain: 'A',
+            structure_id: '8H9S',
+            chain: 'N',
             residue_index: 156,
             residue_label: 'p.Leu156Arg',
             complex: 'Complex V ATP synthase'
@@ -161,8 +188,8 @@ export const demoData: MitoAnalysisData = {
             sources: ['MITOMAP', 'ClinVar']
           },
           structure: {
-            structure_id: 'AF-Q00360-F1',
-            chain: 'A',
+            structure_id: '8H9S',
+            chain: 'N',
             residue_index: 156,
             residue_label: 'p.Leu156Arg',
             complex: 'Complex V ATP synthase'
@@ -211,8 +238,8 @@ export const demoData: MitoAnalysisData = {
             sources: ['MITOMAP', 'ClinVar']
           },
           structure: {
-            structure_id: 'AF-P03905-F1',
-            chain: 'A',
+            structure_id: '9I4I',
+            chain: 'r',
             residue_index: 340,
             residue_label: 'p.Arg340His',
             complex: 'Complex I NADH dehydrogenase'
@@ -246,8 +273,8 @@ export const demoData: MitoAnalysisData = {
             sources: ['MITOMAP', 'ClinVar']
           },
           structure: {
-            structure_id: 'AF-P03905-F1',
-            chain: 'A',
+            structure_id: '9I4I',
+            chain: 'r',
             residue_index: 340,
             residue_label: 'p.Arg340His',
             complex: 'Complex I NADH dehydrogenase'

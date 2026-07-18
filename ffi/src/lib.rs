@@ -1,5 +1,5 @@
-use anyhow::{anyhow, Context, Result};
 use std::ffi::{CStr, CString};
+use std::fmt;
 use std::os::raw::{c_char, c_void};
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -7,23 +7,33 @@ use std::sync::atomic::{AtomicBool, Ordering};
 unsafe extern "C" {
     fn mito_engine_new() -> *mut c_void;
     fn mito_engine_delete(engine: *mut c_void);
-    fn mito_engine_analyze_with_options(
+    fn mito_engine_has_htslib() -> bool;
+    fn mito_engine_version() -> *const c_char;
+    fn mito_engine_schema_version() -> *const c_char;
+    fn mito_engine_error_schema_version() -> *const c_char;
+    fn mito_engine_analyze_with_config_v5(
         engine: *mut c_void,
         input_path: *const c_char,
         ref_path: *const c_char,
         filter_numt: bool,
         threads: usize,
-    ) -> *const c_char;
-    fn mito_engine_analyze_with_cancel(
-        engine: *mut c_void,
-        input_path: *const c_char,
-        ref_path: *const c_char,
-        filter_numt: bool,
-        threads: usize,
+        min_mapping_quality: u8,
+        min_base_quality: u8,
+        excluded_snp_flags: u16,
+        numt_threshold: f64,
+        allow_development_tags: bool,
+        emit_evidence_graph: bool,
+        max_evidence_observations: usize,
+        max_phase_links: usize,
+        evidence_page_size: usize,
+        molecule_id_tag: *const c_char,
+        umi_tag: *const c_char,
+        duplex_tag: *const c_char,
         should_cancel: Option<unsafe extern "C" fn(*mut c_void) -> bool>,
         cancel_user_data: *mut c_void,
     ) -> *const c_char;
     fn mito_engine_get_last_error() -> *const c_char;
+    fn mito_engine_get_last_error_code() -> *const c_char;
     fn mito_engine_free_string(value: *const c_char);
 }
 
@@ -36,15 +46,28 @@ pub struct MitoEngine {
 unsafe impl Send for MitoEngine {}
 
 impl MitoEngine {
-    pub fn new() -> Result<Self> {
+    pub fn capabilities() -> EngineCapabilities {
+        EngineCapabilities {
+            engine_version: static_c_string(unsafe { mito_engine_version() }),
+            schema_version: static_c_string(unsafe { mito_engine_schema_version() }),
+            error_schema_version: static_c_string(unsafe { mito_engine_error_schema_version() }),
+            htslib: unsafe { mito_engine_has_htslib() },
+        }
+    }
+
+    pub fn new() -> Result<Self, MitoError> {
         let raw = unsafe { mito_engine_new() };
         if raw.is_null() {
-            return Err(anyhow!(last_error()));
+            return Err(last_error());
         }
         Ok(Self { raw })
     }
 
-    pub fn analyze(&self, input_path: &Path, reference_path: Option<&Path>) -> Result<String> {
+    pub fn analyze(
+        &self,
+        input_path: &Path,
+        reference_path: Option<&Path>,
+    ) -> Result<String, MitoError> {
         self.analyze_with_options(input_path, reference_path, AnalyzeOptions::default())
     }
 
@@ -53,7 +76,7 @@ impl MitoEngine {
         input_path: &Path,
         reference_path: Option<&Path>,
         options: AnalyzeOptions,
-    ) -> Result<String> {
+    ) -> Result<String, MitoError> {
         self.analyze_with_cancellation(input_path, reference_path, options, None)
     }
 
@@ -63,7 +86,7 @@ impl MitoEngine {
         reference_path: Option<&Path>,
         options: AnalyzeOptions,
         cancel_flag: &AtomicBool,
-    ) -> Result<String> {
+    ) -> Result<String, MitoError> {
         self.analyze_with_cancellation(input_path, reference_path, options, Some(cancel_flag))
     }
 
@@ -73,7 +96,7 @@ impl MitoEngine {
         reference_path: Option<&Path>,
         options: AnalyzeOptions,
         cancel_flag: Option<&AtomicBool>,
-    ) -> Result<String> {
+    ) -> Result<String, MitoError> {
         let input = path_to_cstring(input_path, "input")?;
         let reference = match reference_path {
             Some(path) => Some(path_to_cstring(path, "reference")?),
@@ -83,32 +106,41 @@ impl MitoEngine {
         let reference_ptr = reference
             .as_ref()
             .map_or(std::ptr::null(), |value| value.as_ptr());
-        let result = if let Some(flag) = cancel_flag {
-            unsafe {
-                mito_engine_analyze_with_cancel(
-                    self.raw,
-                    input.as_ptr(),
-                    reference_ptr,
-                    options.filter_numt,
-                    options.threads.max(1),
-                    Some(cancel_callback),
-                    flag as *const AtomicBool as *mut c_void,
-                )
-            }
-        } else {
-            unsafe {
-                mito_engine_analyze_with_options(
-                    self.raw,
-                    input.as_ptr(),
-                    reference_ptr,
-                    options.filter_numt,
-                    options.threads.max(1),
-                )
-            }
+        let molecule_id_tag = protocol_tag_to_cstring(&options.molecule_id_tag)?;
+        let umi_tag = protocol_tag_to_cstring(&options.umi_tag)?;
+        let duplex_tag = protocol_tag_to_cstring(&options.duplex_tag)?;
+        let (callback, user_data) = cancel_flag.map_or((None, std::ptr::null_mut()), |flag| {
+            (
+                Some(cancel_callback as unsafe extern "C" fn(*mut c_void) -> bool),
+                flag as *const AtomicBool as *mut c_void,
+            )
+        });
+        let result = unsafe {
+            mito_engine_analyze_with_config_v5(
+                self.raw,
+                input.as_ptr(),
+                reference_ptr,
+                options.filter_numt,
+                options.threads.max(1),
+                options.min_mapping_quality,
+                options.min_base_quality,
+                options.excluded_snp_flags,
+                options.numt_threshold,
+                options.allow_development_tags,
+                options.emit_evidence_graph,
+                options.max_evidence_observations,
+                options.max_phase_links,
+                options.evidence_page_size,
+                molecule_id_tag.as_ptr(),
+                umi_tag.as_ptr(),
+                duplex_tag.as_ptr(),
+                callback,
+                user_data,
+            )
         };
 
         if result.is_null() {
-            return Err(anyhow!(last_error()));
+            return Err(last_error());
         }
 
         let json = unsafe { CStr::from_ptr(result) }
@@ -119,19 +151,54 @@ impl MitoEngine {
     }
 }
 
-fn path_to_cstring(path: &Path, label: &str) -> Result<CString> {
+fn static_c_string(value: *const c_char) -> String {
+    if value.is_null() {
+        return "unknown".to_owned();
+    }
+    unsafe { CStr::from_ptr(value) }
+        .to_string_lossy()
+        .into_owned()
+}
+
+fn protocol_tag_to_cstring(value: &str) -> Result<CString, MitoError> {
+    CString::new(value).map_err(|_| {
+        MitoError::new(
+            "MITO-E1001",
+            "protocol SAM tag contains an interior NUL byte",
+        )
+    })
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EngineCapabilities {
+    pub engine_version: String,
+    pub schema_version: String,
+    pub error_schema_version: String,
+    pub htslib: bool,
+}
+
+fn path_to_cstring(path: &Path, label: &str) -> Result<CString, MitoError> {
     #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
-        CString::new(path.as_os_str().as_bytes())
-            .with_context(|| format!("{label} path contains an interior NUL byte"))
+        CString::new(path.as_os_str().as_bytes()).map_err(|_| {
+            MitoError::new(
+                "MITO-E1001",
+                format!("{label} path contains an interior NUL byte"),
+            )
+        })
     }
     #[cfg(not(unix))]
     {
-        let value = path
-            .to_str()
-            .with_context(|| format!("{label} path is not valid UTF-8"))?;
-        CString::new(value).with_context(|| format!("{label} path contains an interior NUL byte"))
+        let value = path.to_str().ok_or_else(|| {
+            MitoError::new("MITO-E1001", format!("{label} path is not valid UTF-8"))
+        })?;
+        CString::new(value).map_err(|_| {
+            MitoError::new(
+                "MITO-E1001",
+                format!("{label} path contains an interior NUL byte"),
+            )
+        })
     }
 }
 
@@ -151,10 +218,22 @@ impl Drop for MitoEngine {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct AnalyzeOptions {
     pub filter_numt: bool,
     pub threads: usize,
+    pub min_mapping_quality: u8,
+    pub min_base_quality: u8,
+    pub excluded_snp_flags: u16,
+    pub numt_threshold: f64,
+    pub allow_development_tags: bool,
+    pub emit_evidence_graph: bool,
+    pub max_evidence_observations: usize,
+    pub max_phase_links: usize,
+    pub evidence_page_size: usize,
+    pub molecule_id_tag: String,
+    pub umi_tag: String,
+    pub duplex_tag: String,
 }
 
 impl Default for AnalyzeOptions {
@@ -162,21 +241,60 @@ impl Default for AnalyzeOptions {
         Self {
             filter_numt: true,
             threads: 1,
+            min_mapping_quality: 20,
+            min_base_quality: 10,
+            excluded_snp_flags: 0xF00,
+            numt_threshold: 0.30,
+            allow_development_tags: false,
+            emit_evidence_graph: false,
+            max_evidence_observations: 5_000_000,
+            max_phase_links: 1_000_000,
+            evidence_page_size: 4096,
+            molecule_id_tag: String::new(),
+            umi_tag: String::new(),
+            duplex_tag: String::new(),
         }
     }
 }
 
-fn last_error() -> String {
-    let ptr = unsafe { mito_engine_get_last_error() };
-    if ptr.is_null() {
-        return "unknown mito engine error".to_string();
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MitoError {
+    pub code: String,
+    pub message: String,
+}
+
+impl MitoError {
+    pub fn new(code: impl Into<String>, message: impl Into<String>) -> Self {
+        Self {
+            code: code.into(),
+            message: message.into(),
+        }
     }
-    let message = unsafe { CStr::from_ptr(ptr) }.to_string_lossy();
-    if message.is_empty() {
-        "unknown mito engine error".to_string()
-    } else {
-        message.into_owned()
+}
+
+impl fmt::Display for MitoError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "[{}] {}", self.code, self.message)
     }
+}
+
+impl std::error::Error for MitoError {}
+
+fn last_error() -> MitoError {
+    let code = static_c_string(unsafe { mito_engine_get_last_error_code() });
+    let message = static_c_string(unsafe { mito_engine_get_last_error() });
+    MitoError::new(
+        if code == "unknown" || code.is_empty() {
+            "MITO-E9001".to_owned()
+        } else {
+            code
+        },
+        if message == "unknown" || message.is_empty() {
+            "unknown mito engine error".to_owned()
+        } else {
+            message
+        },
+    )
 }
 
 #[cfg(test)]
@@ -209,13 +327,165 @@ mod tests {
                 AnalyzeOptions {
                     filter_numt: true,
                     threads: 1,
+                    ..AnalyzeOptions::default()
                 },
                 &cancel,
             )
             .expect_err("analysis should be cancelled");
-        assert!(error.to_string().contains("analysis cancelled"));
+        assert_eq!(error.code, "MITO-E1501");
+        assert_eq!(error.message, "analysis cancelled");
         assert!(cancel.load(Ordering::Relaxed));
         let _ = fs::remove_file(input_path);
+    }
+
+    #[test]
+    fn evidence_graph_is_opt_in_and_bounded() {
+        let input_path = temp_path("evidence-graph", "sam");
+        fs::write(
+            &input_path,
+            "@SQ\tSN:NC_012920.1\tLN:16569\nalt\t0\tNC_012920.1\t1\t60\t3M\t*\t0\t0\tGAA\tIII\nreference\t0\tNC_012920.1\t1\t60\t3M\t*\t0\t0\tGAT\tIII\n",
+        )
+        .expect("evidence input");
+
+        let engine = MitoEngine::new().expect("engine");
+        let json = engine
+            .analyze_with_options(
+                &input_path,
+                None,
+                AnalyzeOptions {
+                    emit_evidence_graph: true,
+                    evidence_page_size: 1,
+                    ..AnalyzeOptions::default()
+                },
+            )
+            .expect("schema 0.6 result");
+        assert!(json.contains("\"schema_version\":\"0.6\""));
+        assert!(json.contains("\"missing_pair_state\":\"NOT_CALLABLE\""));
+        assert!(json.contains("\"layout\":\"paged_columnar_molecule_event\""));
+        assert!(json.contains("\"observation_page_size\":1"));
+
+        let error = engine
+            .analyze_with_options(
+                &input_path,
+                None,
+                AnalyzeOptions {
+                    emit_evidence_graph: true,
+                    max_evidence_observations: 1,
+                    ..AnalyzeOptions::default()
+                },
+            )
+            .expect_err("observation cap must fail closed");
+        assert_eq!(error.code, "MITO-E1601");
+        let _ = fs::remove_file(input_path);
+    }
+
+    #[test]
+    fn protocol_tags_cross_the_versioned_ffi_boundary() {
+        let input_path = temp_path("protocol-tags", "sam");
+        fs::write(
+            &input_path,
+            "@SQ\tSN:NC_012920.1\tLN:16569\nread-a\t0\tNC_012920.1\t1\t60\t3M\t*\t0\t0\tGAA\tIII\tMI:Z:M1\tRX:Z:AAA\tDX:Z:duplex\n",
+        )
+        .expect("protocol input");
+        let engine = MitoEngine::new().expect("engine");
+        let json = engine
+            .analyze_with_options(
+                &input_path,
+                None,
+                AnalyzeOptions {
+                    emit_evidence_graph: true,
+                    molecule_id_tag: "MI".to_owned(),
+                    umi_tag: "RX".to_owned(),
+                    duplex_tag: "DX".to_owned(),
+                    ..AnalyzeOptions::default()
+                },
+            )
+            .expect("tagged schema 0.6 result");
+        assert!(json.contains("\"identity_policy\":\"sam_tag:MI\""));
+        assert!(json.contains("\"molecule_id_value\":\"M1\""));
+        assert!(json.contains("\"UMI_RECORDED\""));
+        assert!(json.contains("\"DUPLEX_METADATA_RECORDED\""));
+        let _ = fs::remove_file(input_path);
+    }
+
+    #[test]
+    fn external_failures_preserve_stable_error_codes() {
+        let valid_input = temp_path("valid", "fastq");
+        fs::write(&valid_input, "@read-1\nGATCACAGGT\n+\nIIIIIIIIII\n").expect("valid input");
+        let malformed_input = temp_path("malformed", "fastq");
+        fs::write(&malformed_input, "@read-1\nGATC\nnot-plus\nIIII\n").expect("malformed input");
+        let fasta_input = temp_path("reads", "fasta");
+        fs::write(&fasta_input, ">read-1\nGATC\n").expect("FASTA input");
+        let invalid_reference = temp_path("invalid-reference", "fasta");
+        fs::write(&invalid_reference, "GATC\n").expect("invalid reference");
+        let empty_input = temp_path("empty", "fastq");
+        fs::write(&empty_input, "").expect("empty input");
+        let missing_input = temp_path("missing", "fastq");
+        let missing_reference = temp_path("missing-reference", "fasta");
+
+        let engine = MitoEngine::new().expect("engine");
+        let cases = [
+            (
+                &malformed_input,
+                None,
+                AnalyzeOptions::default(),
+                "MITO-E1103",
+            ),
+            (&fasta_input, None, AnalyzeOptions::default(), "MITO-E1102"),
+            (&empty_input, None, AnalyzeOptions::default(), "MITO-E1104"),
+            (
+                &missing_input,
+                None,
+                AnalyzeOptions::default(),
+                "MITO-E1101",
+            ),
+            (
+                &valid_input,
+                Some(invalid_reference.as_path()),
+                AnalyzeOptions::default(),
+                "MITO-E1202",
+            ),
+            (
+                &valid_input,
+                Some(missing_reference.as_path()),
+                AnalyzeOptions::default(),
+                "MITO-E1201",
+            ),
+            (
+                &valid_input,
+                None,
+                AnalyzeOptions {
+                    numt_threshold: f64::NAN,
+                    ..AnalyzeOptions::default()
+                },
+                "MITO-E1001",
+            ),
+        ];
+        for (input, reference, options, expected_code) in cases {
+            let error = engine
+                .analyze_with_options(input, reference, options)
+                .expect_err("negative case must fail");
+            assert_eq!(error.code, expected_code, "unexpected error: {error}");
+        }
+
+        for path in [
+            valid_input,
+            malformed_input,
+            fasta_input,
+            invalid_reference,
+            empty_input,
+        ] {
+            let _ = fs::remove_file(path);
+        }
+    }
+
+    fn temp_path(label: &str, extension: &str) -> std::path::PathBuf {
+        std::env::temp_dir().join(format!(
+            "mito_ffi_{label}_{}_{}.{}",
+            std::process::id(),
+            unique_suffix(),
+            extension
+        ))
     }
 
     fn unique_suffix() -> u128 {

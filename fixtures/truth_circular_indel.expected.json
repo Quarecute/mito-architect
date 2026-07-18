@@ -1,0 +1,306 @@
+{
+  "alignments": [
+    {
+      "flags": 0,
+      "id": "alignment:0",
+      "molecule_id": "origin-deletion",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 0
+    },
+    {
+      "flags": 0,
+      "id": "alignment:1",
+      "molecule_id": "origin-reference",
+      "role": "primary_candidate",
+      "selected_representative": true,
+      "source_record_index": 1
+    }
+  ],
+  "architectures": [],
+  "callability": [
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:0",
+          "callable_bases": 4,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 4,
+              "start": 3
+            },
+            {
+              "end": 16569,
+              "start": 16568
+            }
+          ],
+          "reference_exclusion_counts": {
+            "DELETION_FROM_REFERENCE_PATH": 2
+          },
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 4,
+      "callable_fraction": 0.000241415,
+      "known": true,
+      "molecule_id": "origin-deletion",
+      "ranges": [
+        {
+          "end": 4,
+          "start": 3
+        },
+        {
+          "end": 16569,
+          "start": 16568
+        }
+      ],
+      "status": "ASSESSED"
+    },
+    {
+      "alignments": [
+        {
+          "alignment_id": "alignment:1",
+          "callable_bases": 6,
+          "disrupted_adjacency_anchors": [],
+          "eligible": true,
+          "inserted_query_bases": 0,
+          "ranges": [
+            {
+              "end": 4,
+              "start": 1
+            },
+            {
+              "end": 16569,
+              "start": 16568
+            }
+          ],
+          "reference_exclusion_counts": {},
+          "soft_clipped_query_bases": 0,
+          "status": "ASSESSED"
+        }
+      ],
+      "basis": "passing_aligned_reference_bases",
+      "callable_bases": 6,
+      "callable_fraction": 0.000362122,
+      "known": true,
+      "molecule_id": "origin-reference",
+      "ranges": [
+        {
+          "end": 4,
+          "start": 1
+        },
+        {
+          "end": 16569,
+          "start": 16568
+        }
+      ],
+      "status": "ASSESSED"
+    }
+  ],
+  "events": [
+    {
+      "alt": "G",
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "component_event_ids": [],
+      "end": 2,
+      "evidence_counts": {
+        "alternate": 1,
+        "callable": 2,
+        "conflict": 0,
+        "event_absent": 1,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "id": "indel:deletion:1-2:GA",
+      "index": 0,
+      "length": 2,
+      "negative_evidence_rule": "same_fragment_callable_deleted_span_with_flanks",
+      "normalization": "rcrs_circular_small_indel_v1",
+      "ref": "GGA",
+      "source_projection": "small_indels",
+      "start": 1,
+      "supporting_molecule_ids": [
+        "origin-deletion"
+      ],
+      "type": "SMALL_DELETION"
+    }
+  ],
+  "evidence_encoding": {
+    "layout": "paged_columnar_molecule_event",
+    "missing_pair_state": "NOT_CALLABLE",
+    "observation_count": 2,
+    "observation_limit": 5000000,
+    "observation_page_count": 1,
+    "observation_page_size": 3,
+    "observation_storage": "embedded_columnar_pages",
+    "phase_link_limit": 1000000,
+    "phase_molecule_policy": "evidence_eligible_only",
+    "phase_molecule_reference": "molecules[].index",
+    "phase_null_model": "independent_marginals_within_jointly_callable",
+    "scope": "snv_indel_sv_complex_evidence_rc2"
+  },
+  "input_alignment_records": 2,
+  "input_molecules": 2,
+  "molecules": [
+    {
+      "alignment_ids": [
+        "alignment:0"
+      ],
+      "alternate_event_ids": [
+        "indel:deletion:1-2:GA"
+      ],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 4,
+      "callable_fraction": 0.000241415,
+      "cluster_id": 0,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 1,
+        "conflict": 0,
+        "event_absent": 0,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "origin-deletion",
+      "identity_policy": "sam_qname",
+      "index": 0,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "ORIGIN_SPANNING_ALIGNMENT",
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 4,
+      "representative_alignment_id": "alignment:0",
+      "source_qnames": [
+        "origin-deletion"
+      ],
+      "warnings": []
+    },
+    {
+      "alignment_ids": [
+        "alignment:1"
+      ],
+      "alternate_event_ids": [],
+      "ambiguous": false,
+      "analysis_eligible": true,
+      "assembly_status": "unique_primary",
+      "callability_status": "ASSESSED",
+      "callable_bases": 6,
+      "callable_fraction": 0.000362122,
+      "cluster_id": 1,
+      "evidence_eligible": true,
+      "evidence_state_counts": {
+        "alternate": 0,
+        "conflict": 0,
+        "event_absent": 1,
+        "low_quality": 0,
+        "reference": 0
+      },
+      "exclusion_reasons": [],
+      "id": "origin-reference",
+      "identity_policy": "sam_qname",
+      "index": 1,
+      "mapping_quality": 60,
+      "mean_base_quality": 40.0,
+      "numt_evidence": [],
+      "numt_score": 0.05,
+      "primary_candidate_count": 1,
+      "protocol_flags": [
+        "ORIGIN_SPANNING_ALIGNMENT",
+        "READ_PROXY_IDENTITY"
+      ],
+      "protocol_metadata": {},
+      "query_length": 6,
+      "representative_alignment_id": "alignment:1",
+      "source_qnames": [
+        "origin-reference"
+      ],
+      "warnings": []
+    }
+  ],
+  "observations": [
+    {
+      "alignment_id": "alignment:0",
+      "base_quality": null,
+      "event_id": "indel:deletion:1-2:GA",
+      "evidence_source": "cigar_small_indel",
+      "id": "observation:0",
+      "mapping_quality": 60,
+      "molecule_id": "origin-deletion",
+      "observed_allele": "G",
+      "state": "ALTERNATE",
+      "strand": "+"
+    },
+    {
+      "alignment_id": "alignment:1",
+      "base_quality": null,
+      "event_id": "indel:deletion:1-2:GA",
+      "evidence_source": "callable_reference_path",
+      "id": "observation:1",
+      "mapping_quality": 60,
+      "molecule_id": "origin-reference",
+      "observed_allele": "GGA",
+      "state": "EVENT_ABSENT",
+      "strand": "+"
+    }
+  ],
+  "phase_links": [],
+  "schema_version": "0.6",
+  "variants": [
+    {
+      "alt": "G",
+      "alt_depth": 1,
+      "assessability": "REFERENCE_AND_ALTERNATE",
+      "callable_depth": 2,
+      "ci95_high": 0.905468794,
+      "ci95_low": 0.094531206,
+      "conflict_depth": 0,
+      "end": 2,
+      "event_absent_depth": 1,
+      "event_id": "indel:deletion:1-2:GA",
+      "filter_status": "NOT_CALIBRATED",
+      "heteroplasmy": 0.5,
+      "homopolymer_context": {
+        "reference_base": "G",
+        "run_length": 2
+      },
+      "length": 2,
+      "low_quality_depth": 0,
+      "multi_allelic": false,
+      "negative_evidence_rule": "same_fragment_callable_deleted_span_with_flanks",
+      "normalization": "rcrs_circular_small_indel_v1",
+      "numt_assessability": "NOT_ASSESSABLE",
+      "other_depth": 0,
+      "position": 1,
+      "qc_flags": [
+        "NUMT_NOT_ASSESSABLE",
+        "SINGLE_STRAND_ALT_SUPPORT",
+        "HOMOPOLYMER_CONTEXT"
+      ],
+      "ref": "GGA",
+      "ref_depth": 1,
+      "start": 1,
+      "supporting_molecule_ids": [
+        "origin-deletion"
+      ],
+      "supporting_reads": [
+        "origin-deletion"
+      ],
+      "type": "SMALL_DELETION"
+    }
+  ]
+}

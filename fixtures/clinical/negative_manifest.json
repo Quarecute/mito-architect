@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "input": "../truth_molecule_edges.sam",
+  "cases": [
+    {
+      "name": "schema header mismatch",
+      "annotations": "invalid_header.tsv",
+      "expected_error_code": "MITO-E1302"
+    },
+    {
+      "name": "coordinate zero",
+      "annotations": "invalid_position.tsv",
+      "expected_error_code": "MITO-E1302"
+    },
+    {
+      "name": "conflicting structure mapping",
+      "annotations": "conflicting_structure.tsv",
+      "expected_error_code": "MITO-E1302"
+    },
+    {
+      "name": "unsafe source URL",
+      "annotations": "invalid_url.tsv",
+      "expected_error_code": "MITO-E1302"
+    }
+  ]
+}
